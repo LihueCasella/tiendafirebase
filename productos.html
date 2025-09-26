@@ -129,30 +129,36 @@
     <script type="module">
         // Importaciones de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, query, where, onSnapshot, setLogLevel, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Activar logs de Firebase para debugging
         setLogLevel('Debug');
 
-        // Configuración Global (Provista por el entorno Canvas)
-        const firebaseConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
-        let firebaseConfig = {};
-        try {
-            // CORRECCIÓN CLAVE: Asegurar que la configuración se parsea correctamente
-            firebaseConfig = JSON.parse(firebaseConfigString);
-        } catch (e) {
-            console.error("Error al parsear __firebase_config:", e);
-        }
-
         const authStatusEl = document.getElementById('auth-status');
         
-        // Comprobar si la configuración es válida
-        const isValidConfig = Object.keys(firebaseConfig).length > 0 && firebaseConfig.projectId;
+        // Función para leer la configuración de forma segura
+        function getFirebaseConfig() {
+            try {
+                // Leer la variable global de configuración
+                const configString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+                const config = JSON.parse(configString);
+                
+                // Verificar que tenga el projectId para considerarla válida
+                if (Object.keys(config).length > 0 && config.projectId) {
+                    return config;
+                }
+            } catch (e) {
+                console.error("Error al parsear __firebase_config:", e);
+            }
+            return null;
+        }
 
-        if (!isValidConfig) {
-            authStatusEl.textContent = "Error: Configuración de Firebase inválida.";
-            console.error("Error de configuración: 'projectId' no encontrado en firebaseConfig. La inicialización se detiene.");
+        const firebaseConfig = getFirebaseConfig();
+
+        if (firebaseConfig === null) {
+            authStatusEl.textContent = "Error: Configuración de Firebase Inválida.";
+            console.error("Error de configuración: La configuración de Firebase no es válida o está ausente. La inicialización se detiene.");
         } else {
             // Inicializar Firebase
             const app = initializeApp(firebaseConfig);
@@ -162,8 +168,11 @@
             // Autenticación: Usar token provisto o iniciar sesión anónimamente
             async function authenticate() {
                 try {
-                    if (typeof __initial_auth_token !== 'undefined') {
-                        await signInWithCustomToken(auth, __initial_auth_token);
+                    // La variable __initial_auth_token puede no estar definida, la comprobamos.
+                    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
                         authStatusEl.textContent = "Conectado";
                     } else {
                         await signInAnonymously(auth);
@@ -176,10 +185,9 @@
                 }
             }
 
-            // Exponer objetos de Firebase al alcance global (window)
+            // Exponer objetos y funciones de Firebase al alcance global (window)
             window.db = db;
             window.auth = auth;
-            // Exponer funciones de Firestore necesarias para js/productos.js y js/init_data.js
             window.collection = collection;
             window.query = query;
             window.where = where;
@@ -195,7 +203,7 @@
     </script>
     
     <!-- Enlace al script de lógica de productos -->
-    <script type="module" src="js/init_data.js"></script>
+    <script type="module" src="js/productos.js"></script>
     <!-- Si quieres inicializar datos, carga js/init_data.js aquí en lugar de js/productos.js una vez. -->
 
 </body>
