@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MegaStore | Tecnología, Moda y Hogar</title>
     <!-- Aquí enlazarás tu archivo CSS -->
-    <link rel="stylesheet" href="assets/main.css">
-    <!-- Opcional: Iconos de Font Awesome para el carrito/búsqueda (se usa ícono simple por defecto) -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- Opcional: Iconos de Font Awesome para el carrito/búsqueda -->
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"> -->
 </head>
 <body>
@@ -21,7 +21,7 @@
             <button aria-label="Buscar"><i class="fas fa-search"></i></button>
         </div>
         <nav class="user-nav">
-            <a href="#" class="nav-item">Ingresar</a>
+            <a href="#" id="auth-status" class="nav-item">Conectando...</a>
             <a href="#" class="nav-item cart-icon">🛒 Carrito</a>
         </nav>
     </header>
@@ -72,30 +72,72 @@
         </div>
     </footer>
 
-    <!-- 5. SCRIPTS DE FIREBASE Y CONFIGURACIÓN -->
-    <!-- Importante: Usamos las versiones compat para mejor soporte y simplicidad en este entorno -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    
-    <script>
-        const firebaseConfig = {
-          // --- ¡IMPORTANTE! REEMPLAZA ESTAS CLAVES CON LAS TUYAS ---
-          apiKey: "TU_API_KEY",
-          authDomain: "TU_AUTH_DOMAIN",
-          projectId: "TU_PROJECT_ID",
-          storageBucket: "TU_STORAGE_BUCKET",
-          messagingSenderId: "TU_MESSAGING_SENDER_ID",
-          appId: "TU_APP_ID"
-        };
-        // Inicializar Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        // Exponer la instancia de Firestore para usarla en app.js
-        const db = app.firestore();
+    <!-- 5. SCRIPTS DE FIREBASE Y CONFIGURACIÓN (CONEXIÓN AUTOMÁTICA) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setDoc, doc, onSnapshot, collection, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
+        
+        // Configuraciones globales proporcionadas por el entorno
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // Inicialización de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // Debugging
+        setLogLevel('debug');
+        
+        // Autenticación
+        async function authenticate() {
+            try {
+                if (authToken) {
+                    await signInWithCustomToken(auth, authToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error durante la autenticación:", error);
+            }
+        }
+        
+        authenticate();
 
-        console.log("Firebase inicializado y conectado a Firestore.");
+        // Exponer variables globales para que app.js pueda usarlas (menos ideal, pero funciona)
+        window.db = db;
+        window.auth = auth;
+        window.getAuth = getAuth;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.getFirestore = getFirestore;
+        window.collection = collection;
+        window.query = query;
+        window.onSnapshot = onSnapshot;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        
+        onAuthStateChanged(auth, (user) => {
+            const authStatus = document.getElementById('auth-status');
+            if (user) {
+                authStatus.textContent = `UID: ${user.uid.substring(0, 8)}...`;
+                console.log("Usuario autenticado. UID:", user.uid);
+            } else {
+                authStatus.textContent = 'Ingresar';
+                console.log("Usuario no autenticado (Anónimo o Error)");
+            }
+        });
+
+        // Cargar app.js (ya que ahora usamos módulos, el orden de carga es diferente)
+        // Podrías poner la lógica de app.js aquí, o cargarlo después de que el DOM esté listo
+        // Por simplicidad y para mantener el archivo app.js separado, lo cargamos aquí.
+        const script = document.createElement('script');
+        script.src = 'js/app.js';
+        document.body.appendChild(script);
+
     </script>
 
-    <!-- 6. Enlace a tu script principal (app.js) -->
-    <script src="js/app.js"></script>
+    <!-- 6. El script app.js ahora se carga dinámicamente o debe usar la sintaxis de módulo si desea importaciones -->
 </body>
 </html>
