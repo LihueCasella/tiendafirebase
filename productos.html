@@ -1,205 +1,202 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-       
     <meta charset="UTF-8">
-       
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Productos | MegaStore</title>
-       
+    <title>Productos | E-Commerce Dinámico</title>
+    <!-- Incluimos Font Awesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Enlace a tu archivo CSS existente (o el que definiremos a continuación) -->
     <link rel="stylesheet" href="assets/main.css">
-        <!-- Se recomienda incluir Font Awesome para los iconos de filtro -->
-       
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-
 <body>
 
-        <!-- 1. BARRA SUPERIOR Y NAVEGACIÓN PRINCIPAL (REPETIDO DE INDEX.HTML) -->
-        <header class="header">
-                <div class="logo">
-                        <a href="index.html" style="text-decoration: none; color: inherit;">
-                                <h1>MegaStore</h1>
-                            </a>
-                    </div>
-                <div class="search-bar">
-                        <input type="text" placeholder="Buscar productos...">
-                        <button aria-label="Buscar"><i class="fas fa-search"></i></button>
-                    </div>
-                <nav class="user-nav">
-                        <a href="#" id="auth-status" class="nav-item">Conectando...</a>
-                        <a href="carrito.html" class="nav-item cart-icon">🛒 Carrito</a>
-                    </nav>
-            </header>
+    <!-- 1. Header (Sección de Navegación Principal) -->
+    <header>
+        <div class="header">
+            <div class="logo">
+                <h1>MegaStore</h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar productos, marcas...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <nav class="user-nav">
+                <!-- Se muestra el estado de conexión para debug -->
+                <p id="auth-status" style="color: white; margin-right: 15px;">Conectando...</p>
+                <a href="#" class="nav-item"><i class="fas fa-user"></i> Mi Cuenta</a>
+                <a href="#" class="nav-item cart-icon"><i class="fas fa-shopping-cart"></i> Carrito</a>
+            </nav>
+        </div>
+        
+        <!-- Menú de Categorías -->
+        <nav class="main-menu">
+            <a href="productos.html?cat=all" class="menu-item" data-category="all">Todos</a>
+            <a href="productos.html?cat=tecnologia" class="menu-item" data-category="tecnologia">Tecnología</a>
+            <a href="productos.html?cat=indumentaria" class="menu-item" data-category="indumentaria">Indumentaria</a>
+            <a href="productos.html?cat=hogar" class="menu-item" data-category="hogar">Hogar</a>
+            <a href="#" class="menu-item" data-category="otros">Otros</a>
+        </nav>
+    </header>
 
-        <nav class="main-menu">
-                <!-- Estos enlaces apuntarán a sí mismos, pasando la categoría como parámetro -->
-                <a href="productos.html?cat=tecnologia" class="menu-item" data-category="tecnologia">Tecnología</a>
-                <a href="productos.html?cat=indumentaria" class="menu-item"
-            data-category="indumentaria">Indumentaria</a>
-                <a href="productos.html?cat=hogar" class="menu-item" data-category="hogar">Hogar</a>
-                <a href="#" class="menu-item">Ofertas</a>
-                <a href="#" class="menu-item">Ayuda</a>
-            </nav>
-       
-        <!-- 2. CONTENIDO PRINCIPAL: BARRA LATERAL (FILTROS) Y LISTADO -->
-        <main class="container product-page-layout">
-               
-                <!-- BARRA LATERAL: FILTROS -->
-                <aside class="sidebar-filters">
-                        <h3 id="current-category-title" class="filter-title">Categoría: Tecnología</h3>
-                       
-                        <!-- Bloque de Filtro de Rango de Precio -->
-                        <div class="filter-group">
-                                <h4><i class="fas fa-tags"></i> Precio</h4>
-                                <div class="price-range">
-                                        <input type="number" id="min-price" placeholder="Mínimo" value="0">
-                                        <span>-</span>
-                                        <input type="number" id="max-price" placeholder="Máximo">
-                                        <button id="apply-price-filter" class="btn btn-small">Aplicar</button>
-                                    </div>
-                            </div>
+    <!-- 2. Contenido Principal: Filtros y Listado -->
+    <div class="container">
+        <h2 id="listing-title" class="section-title">Cargando Título...</h2>
 
-                        <!-- Bloque de Filtro de Marca (Común a todas las categorías) -->
-                        <div class="filter-group">
-                                <h4><i class="fas fa-building"></i> Marca</h4>
-                                <ul class="filter-list" id="brand-filters">
-                                        <li><label><input type="checkbox" data-filter="marca" value="Samsung">
-                            Samsung</label></li>
-                                        <li><label><input type="checkbox" data-filter="marca" value="Logitech">
-                            Logitech</label></li>
-                                        <li><label><input type="checkbox" data-filter="marca" value="Nike"> Nike</label>
-                    </li>
-                                        <li><label><input type="checkbox" data-filter="marca" value="Zara"> Zara</label>
-                    </li>
-                                        <li><label><input type="checkbox" data-filter="marca" value="Ikea"> Ikea</label>
-                    </li>
-                                    </ul>
-                                <button class="btn-clear-filter">Limpiar Marcas</button>
-                            </div>
+        <div class="product-page-layout">
+            
+            <!-- Barra Lateral de Filtros (Aside) -->
+            <aside class="sidebar-filters">
+                <h3 class="filter-title"><i class="fas fa-filter"></i> Filtrar Productos</h3>
+                
+                <!-- Filtro de Precio -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-dollar-sign"></i> Rango de Precio</h4>
+                    <div class="price-range">
+                        <input type="number" id="min-price" placeholder="Mín" value="0">
+                        <span>-</span>
+                        <input type="number" id="max-price" placeholder="Máx">
+                    </div>
+                    <button class="btn btn-small" id="apply-price-filter">Aplicar</button>
+                </div>
 
-                        <!-- Bloque de Filtros Específicos (Talla / Capacidad / Material) -->
-                        <!-- Se controlará con JS dependiendo de la categoría cargada -->
-                        <div class="filter-group specific-filters" id="specific-filter-group">
-                                <h4><i class="fas fa-list-alt"></i> Filtros Específicos</h4>
-                                <!-- El contenido se inyectará aquí con JavaScript -->
-                                <p class="placeholder-text">Filtros específicos aparecerán aquí (Ej: Talla, Memoria,
-                    Material).</p>
-                            </div>
-                    </aside>
+                <!-- Filtro Dinámico de Marca -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-tag"></i> Marca</h4>
+                    <ul class="filter-list" id="brand-filters">
+                        <!-- Checkboxes de Marca se inyectarán aquí por JS -->
+                        <li><p class="placeholder-text">Cargando marcas...</p></li>
+                    </ul>
+                    <button class="btn-clear-filter" data-filter-type="marca">Limpiar Marcas</button>
+                </div>
 
-                <!-- ÁREA PRINCIPAL: LISTADO DE PRODUCTOS -->
-                <section class="product-listing">
-                        <h2 id="listing-title">Cargando Productos...</h2>
-                       
-                        <div class="sort-options">
-                                <label for="sort-by">Ordenar por:</label>
-                                <select id="sort-by">
-                                        <option value="default">Relevancia</option>
-                                        <option value="price_asc">Precio (Menor a Mayor)</option>
-                                        <option value="price_desc">Precio (Mayor a Menor)</option>
-                                        <option value="name_asc">Nombre (A-Z)</option>
-                                    </select>
-                            </div>
+                <!-- Filtro Dinámico Específico (Ej: Talla, Capacidad) -->
+                <div class="filter-group" id="specific-filter-group" style="display: none;">
+                    <h4><i class="fas fa-list-alt"></i> Específico</h4>
+                    <ul class="filter-list">
+                        <li><p class="placeholder-text">Cargando filtros...</p></li>
+                    </ul>
+                    <button class="btn-clear-filter" data-filter-type="specific">Limpiar Filtros</button>
+                </div>
 
-                        <!-- Aquí se inyectarán las tarjetas de producto -->
-                        <div class="product-grid" id="product-listing-grid">
-                                <!-- Los productos se cargan con JS -->
-                                <p id="listing-loading-message">Iniciando conexión con Firebase...</p>
-                            </div>
-                       
-                        <div class="pagination">
-                                <button class="btn" disabled>Anterior</button>
-                                <span>Página 1 de 5</span>
-                                <button class="btn">Siguiente</button>
-                            </div>
-                    </section>
+                <p id="current-category-title" class="placeholder-text" style="text-align: center; margin-top: 20px;"></p>
 
-            </main>
+            </aside>
 
-        <!-- 3. FOOTER (REPETIDO DE INDEX.HTML) -->
-        <footer class="footer">
-                <div class="footer-content">
-                        <p>&copy; 2025 MegaStore. Todos los derechos reservados.</p>
-                        <nav class="footer-links">
-                                <a href="#">Términos y Condiciones</a> |
-                                <a href="#">Política de Privacidad</a> |
-                                <a href="#">Contacto</a>
-                            </nav>
-                    </div>
-            </footer>
+            <!-- Listado de Productos (Section) -->
+            <section class="product-listing">
+                
+                <!-- Opciones de Ordenamiento -->
+                <div class="sort-options">
+                    <label for="sort-by"><i class="fas fa-sort-amount-down"></i> Ordenar por:</label>
+                    <select id="sort-by">
+                        <option value="default">Relevancia</option>
+                        <option value="price_asc">Precio: Más bajo primero</option>
+                        <option value="price_desc">Precio: Más alto primero</option>
+                        <option value="name_asc">Nombre (A-Z)</option>
+                    </select>
+                </div>
 
-        <!-- 4. SCRIPTS DE FIREBASE Y JS (Módulos) -->
-       
+                <!-- Grid de Productos -->
+                <div class="product-grid" id="product-listing-grid">
+                    <!-- Las tarjetas de producto se inyectarán aquí -->
+                    <p id="listing-loading-message">Cargando productos...</p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- 3. Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 E-Commerce Dinámico. Todos los derechos reservados.</p>
+            <div class="footer-links">
+                <a href="#">Política de Privacidad</a> | 
+                <a href="#">Términos de Servicio</a> | 
+                <a href="#">Contacto</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase Initialization and Script Loading -->
     <script type="module">
+        // Importaciones de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, setDoc, doc, onSnapshot, collection, query, where, getDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
+        import { getFirestore, collection, query, where, onSnapshot, setLogLevel, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Activar logs de Firebase para debugging
+        setLogLevel('Debug');
 
-        // Configuraciones globales proporcionadas por el entorno
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Inicialización de Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // Debugging
-        setLogLevel('debug');
-
-        // Autenticación y Carga
-        async function initFirebaseAndLoadApp() {
-            try {
-                if (authToken) {
-                    await signInWithCustomToken(auth, authToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Error durante la autenticación:", error);
-                document.getElementById('listing-loading-message').textContent = 'Error: Falló la autenticación con Firebase.';
-                return;
-            }
-
-            // Exponer variables globales SOLAMENTE después de la inicialización
-            window.db = db;
-            window.auth = auth;
-            // Exponer las funciones de Firestore necesarias
-            window.collection = collection;
-            window.query = query;
-            window.onSnapshot = onSnapshot;
-            window.doc = doc;
-            window.setDoc = setDoc;
-            window.where = where;
-            window.getDoc = getDoc;
-            window.increment = increment;
-            window.serverTimestamp = serverTimestamp;
-
-            // Informar al script js/productos.js que ya puede iniciar
-            // Usamos un evento personalizado
-            document.dispatchEvent(new CustomEvent('firebase-ready'));
-
-            // Actualizar estado de autenticación en la UI
-            onAuthStateChanged(auth, (user) => {
-                const authStatus = document.getElementById('auth-status');
-                if (user) {
-                    authStatus.textContent = `UID: ${user.uid.substring(0, 8)}...`;
-                } else {
-                    authStatus.textContent = 'Ingresar';
-                }
-            });
+        // Configuración Global (Provista por el entorno Canvas)
+        const firebaseConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+        let firebaseConfig = {};
+        try {
+            // CORRECCIÓN CLAVE: Asegurar que la configuración se parsea correctamente
+            firebaseConfig = JSON.parse(firebaseConfigString);
+        } catch (e) {
+            console.error("Error al parsear __firebase_config:", e);
         }
 
-        initFirebaseAndLoadApp();
+        const authStatusEl = document.getElementById('auth-status');
+        
+        // Comprobar si la configuración es válida
+        const isValidConfig = Object.keys(firebaseConfig).length > 0 && firebaseConfig.projectId;
+
+        if (!isValidConfig) {
+            authStatusEl.textContent = "Error: Configuración de Firebase inválida.";
+            console.error("Error de configuración: 'projectId' no encontrado en firebaseConfig. La inicialización se detiene.");
+        } else {
+            // Inicializar Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const auth = getAuth(app);
+            
+            // Autenticación: Usar token provisto o iniciar sesión anónimamente
+            async function authenticate() {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined') {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                        authStatusEl.textContent = "Conectado";
+                    } else {
+                        await signInAnonymously(auth);
+                        authStatusEl.textContent = "Anónimo";
+                    }
+                    console.log("Firebase Authentication exitosa.");
+                } catch (error) {
+                    console.error("Error en la autenticación de Firebase:", error);
+                    authStatusEl.textContent = "Fallo de Auth";
+                }
+            }
+
+            // Exponer objetos de Firebase al alcance global (window)
+            window.db = db;
+            window.auth = auth;
+            // Exponer funciones de Firestore necesarias para js/productos.js y js/init_data.js
+            window.collection = collection;
+            window.query = query;
+            window.where = where;
+            window.onSnapshot = onSnapshot;
+            window.addDoc = addDoc;
+            window.getDocs = getDocs;
+
+            // Iniciar autenticación y luego disparar un evento para que el script de productos empiece
+            authenticate().then(() => {
+                document.dispatchEvent(new Event('firebase-ready'));
+            });
+        }
     </script>
-       
-        <!-- 5. Script Específico de la Página de Productos -->
-       
+    
+    <!-- Enlace al script de lógica de productos -->
     <script type="module" src="js/init_data.js"></script>
+    <!-- Si quieres inicializar datos, carga js/init_data.js aquí en lugar de js/productos.js una vez. -->
 
 </body>
-
 </html>
