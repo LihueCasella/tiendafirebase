@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Cargando Producto...</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- CSS Específico para Detalle -->
+    <style>
+        .detail-container {
+            display: flex;
+            flex-direction: row;
+            padding: 30px 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            gap: 40px;
+        }
+        .detail-loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #555;
+        }
+        .image-gallery {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .main-image {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .product-info-detail {
+            flex: 1;
+            padding-right: 20px;
+        }
+        .product-info-detail h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .product-info-detail .brand {
+            font-size: 1rem;
+            color: #888;
+            margin-bottom: 20px;
+        }
+        .product-info-detail .price {
+            font-size: 3rem;
+            color: #e63946; /* Color de énfasis */
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .product-info-detail .description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #555;
+        }
+        .purchase-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .quantity-control button, .quantity-control input {
+            padding: 10px 15px;
+            border: none;
+            background: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 50px;
+            text-align: center;
+        }
+        .quantity-control input {
+            width: 40px;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            -moz-appearance: textfield; /* Firefox */
+        }
+        .quantity-control input::-webkit-outer-spin-button,
+        .quantity-control input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .btn-add-to-cart {
+            padding: 12px 30px;
+            background-color: #2a9d8f; /* Verde para acción */
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .btn-add-to-cart:hover {
+            background-color: #264653;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .detail-container {
+                flex-direction: column;
+                padding: 15px;
+                gap: 20px;
+            }
+            .product-info-detail {
+                padding-right: 0;
+            }
+            .product-info-detail h1 {
+                font-size: 2rem;
+            }
+            .product-info-detail .price {
+                font-size: 2.5rem;
+            }
+            .purchase-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .quantity-control {
+                width: 100%;
+                justify-content: center;
+            }
+            .btn-add-to-cart {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. BARRA SUPERIOR Y NAVEGACIÓN PRINCIPAL (REPETIDO DE INDEX/PRODUCTOS.HTML) -->
+    <header class="header">
+        <div class="logo">
+            <h1>MegaStore</h1> 
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar productos...">
+            <button aria-label="Buscar"><i class="fas fa-search"></i></button>
+        </div>
+        <nav class="user-nav">
+            <a href="#" id="auth-status" class="nav-item">Conectando...</a>
+            <a href="#" class="nav-item cart-icon">🛒 Carrito</a>
+        </nav>
+    </header>
+
+    <nav class="main-menu">
+        <a href="productos.html?cat=tecnologia" class="menu-item" data-category="tecnologia">Tecnología</a>
+        <a href="productos.html?cat=indumentaria" class="menu-item" data-category="indumentaria">Indumentaria</a>
+        <a href="productos.html?cat=hogar" class="menu-item" data-category="hogar">Hogar</a>
+        <a href="#" class="menu-item">Ofertas</a>
+        <a href="#" class="menu-item">Ayuda</a>
+    </nav>
+    
+    <!-- 2. CONTENIDO PRINCIPAL: DETALLE DEL PRODUCTO -->
+    <main class="container">
+        
+        <div id="product-detail-area">
+            <p class="detail-loading" id="loading-message">Cargando detalles del producto...</p>
+            
+            <!-- Aquí se inyectará el detalle completo del producto -->
+            <div class="detail-container hidden" id="product-content">
+                
+                <div class="image-gallery">
+                    <img id="detail-main-image" class="main-image" src="https://placehold.co/500x400/eeeeee/333333?text=Cargando..." alt="Imagen Principal del Producto">
+                    <!-- Podrían ir miniaturas aquí si tuvieras más imágenes -->
+                </div>
+
+                <div class="product-info-detail">
+                    <h1 id="detail-name">Nombre del Producto</h1>
+                    <p class="brand" id="detail-brand">Marca</p>
+                    
+                    <div class="price" id="detail-price">$999.99</div>
+
+                    <p class="description" id="detail-description">Descripción corta del producto. Se cargará la descripción completa aquí.</p>
+
+                    <!-- Acciones de Compra -->
+                    <div class="purchase-actions">
+                        <div class="quantity-control">
+                            <button id="qty-minus" aria-label="Disminuir Cantidad">-</button>
+                            <input type="number" id="qty-input" value="1" min="1" max="100" readonly>
+                            <button id="qty-plus" aria-label="Aumentar Cantidad">+</button>
+                        </div>
+                        <button id="add-to-cart-btn" class="btn-add-to-cart">
+                            <i class="fas fa-shopping-cart"></i> Añadir al Carrito
+                        </button>
+                    </div>
+
+                    <!-- Sección de Especificaciones (Inyectada por JS) -->
+                    <div class="specifications" id="detail-specs">
+                        <!-- Especificaciones como RAM, Talla, etc. -->
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- 3. FOOTER (REPETIDO DE INDEX.HTML) -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 MegaStore. Todos los derechos reservados.</p>
+            <nav class="footer-links">
+                <a href="#">Términos y Condiciones</a> | 
+                <a href="#">Política de Privacidad</a> | 
+                <a href="#">Contacto</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- 4. SCRIPTS DE FIREBASE Y JS (Módulos) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Importamos todo lo necesario para leer documentos, escribir en carrito y actualizar
+        import { getFirestore, setDoc, doc, onSnapshot, collection, query, where, getDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
+        
+        // Configuraciones globales proporcionadas por el entorno
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // Inicialización de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        setLogLevel('debug');
+        
+        // Autenticación
+        async function authenticate() {
+            try {
+                if (authToken) {
+                    await signInWithCustomToken(auth, authToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error durante la autenticación:", error);
+            }
+        }
+        
+        authenticate();
+
+        // Exponer variables globales para que el script de esta página pueda usarlas
+        window.db = db;
+        window.auth = auth;
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.setDoc = setDoc;
+        window.increment = increment;
+        window.serverTimestamp = serverTimestamp;
+        
+        onAuthStateChanged(auth, (user) => {
+            const authStatus = document.getElementById('auth-status');
+            if (user) {
+                authStatus.textContent = `UID: ${user.uid.substring(0, 8)}...`;
+            } else {
+                authStatus.textContent = 'Ingresar';
+            }
+        });
+    </script>
+    
+    <!-- 5. Script Específico de la Página de Detalle -->
+    <script type="module" src="js/detalle.js"></script>
+
+</body>
+</html>
