@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MegaStore | Tecnología, Moda y Hogar</title>
+    <!-- Aquí enlazarás tu archivo CSS -->
+    <link rel="stylesheet" href="assets/main.css">
+    <!-- Opcional: Iconos de Font Awesome para el carrito/búsqueda (se usa ícono simple por defecto) -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"> -->
+</head>
+<body>
+
+    <!-- 1. BARRA SUPERIOR Y NAVEGACIÓN PRINCIPAL -->
+    <header class="header">
+        <div class="logo">
+            <h1>MegaStore</h1> 
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar productos...">
+            <button aria-label="Buscar"><i class="fas fa-search"></i></button>
+        </div>
+        <nav class="user-nav">
+            <a href="#" class="nav-item">Ingresar</a>
+            <a href="#" class="nav-item cart-icon">🛒 Carrito</a>
+        </nav>
+    </header>
+
+    <nav class="main-menu">
+        <a href="productos.html?cat=tecnologia" class="menu-item">Tecnología</a>
+        <a href="productos.html?cat=indumentaria" class="menu-item">Indumentaria</a>
+        <a href="productos.html?cat=hogar" class="menu-item">Hogar</a>
+        <a href="#" class="menu-item">Ofertas</a>
+        <a href="#" class="menu-item">Ayuda</a>
+    </nav>
+
+    <!-- 2. SECCIÓN DESTACADA (Banner Principal) -->
+    <section class="hero-banner">
+        <div class="banner-content">
+            <h2>Manten tu vida al máximo.</h2>
+            <p>Descubre las últimas novedades en todas nuestras categorías.</p>
+            <a href="#" class="btn btn-primary">VER PRODUCTOS</a>
+        </div>
+    </section>
+    
+    <!-- 3. PRODUCTOS DESTACADOS POR CATEGORÍA -->
+    <main class="container">
+        <h2 class="section-title">Nuestros productos destacados</h2>
+
+        <!-- Navegación de pestañas (similar al ejemplo) -->
+        <div class="category-tabs">
+            <button class="tab-btn active">Tecnología</button>
+            <button class="tab-btn">Indumentaria</button>
+            <button class="tab-btn">Hogar</button>
+        </div>
+        
+        <!-- Contenedor de la Grilla de Productos (se llenará con JS) -->
+        <div class="product-grid">
+            <!-- Las tarjetas de producto se generarán aquí con JavaScript -->
+        </div> 
+    </main>
+
+    <!-- 4. FOOTER (Información Legal y Contacto) -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 MegaStore. Todos los derechos reservados.</p>
+            <nav class="footer-links">
+                <a href="#">Términos y Condiciones</a> | 
+                <a href="#">Política de Privacidad</a> | 
+                <a href="#">Contacto</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- 5. SCRIPTS DE FIREBASE Y CONFIGURACIÓN -->
+    <!-- Importante: Usamos las versiones compat para mejor soporte y simplicidad en este entorno -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+          // --- ¡IMPORTANTE! REEMPLAZA ESTAS CLAVES CON LAS TUYAS ---
+          apiKey: "TU_API_KEY",
+          authDomain: "TU_AUTH_DOMAIN",
+          projectId: "TU_PROJECT_ID",
+          storageBucket: "TU_STORAGE_BUCKET",
+          messagingSenderId: "TU_MESSAGING_SENDER_ID",
+          appId: "TU_APP_ID"
+        };
+        // Inicializar Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        // Exponer la instancia de Firestore para usarla en app.js
+        const db = app.firestore();
+
+        console.log("Firebase inicializado y conectado a Firestore.");
+    </script>
+
+    <!-- 6. Enlace a tu script principal (app.js) -->
+    <script src="js/app.js"></script>
+</body>
+</html>
