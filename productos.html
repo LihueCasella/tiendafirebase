@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos | MegaStore</title>
-    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="styles/main.css">
     <!-- Se recomienda incluir Font Awesome para los iconos de filtro -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
@@ -116,11 +116,11 @@
     </footer>
 
     <!-- 4. SCRIPTS DE FIREBASE Y JS (Módulos) -->
-    <!-- Módulos de Firebase y exposición de globales (Repetido del index.html) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, setDoc, doc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // 🚨 CAMBIO CLAVE AQUÍ: Importamos getDoc, increment, y serverTimestamp
+        import { getFirestore, setDoc, doc, onSnapshot, collection, query, where, getDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
         
         // Configuraciones globales proporcionadas por el entorno
@@ -161,14 +161,21 @@
         window.onSnapshot = onSnapshot;
         window.doc = doc;
         window.setDoc = setDoc;
-        window.where = where; // ¡Necesitamos 'where' para los filtros!
+        window.where = where; 
+        
+        // 🚨 Exponer las nuevas funciones necesarias para el carrito
+        window.getDoc = getDoc;
+        window.increment = increment;
+        window.serverTimestamp = serverTimestamp;
         
         onAuthStateChanged(auth, (user) => {
             const authStatus = document.getElementById('auth-status');
             if (user) {
                 authStatus.textContent = `UID: ${user.uid.substring(0, 8)}...`;
+                console.log("Usuario autenticado. UID:", user.uid);
             } else {
                 authStatus.textContent = 'Ingresar';
+                console.log("Usuario no autenticado (Anónimo o Error)");
             }
         });
     </script>
