@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos | MegaStore</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <!-- Se recomienda incluir Font Awesome para los iconos de filtro -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <!-- 1. BARRA SUPERIOR Y NAVEGACIÓN PRINCIPAL (REPETIDO DE INDEX.HTML) -->
+    <header class="header">
+        <div class="logo">
+            <h1>MegaStore</h1> 
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar productos...">
+            <button aria-label="Buscar"><i class="fas fa-search"></i></button>
+        </div>
+        <nav class="user-nav">
+            <a href="#" id="auth-status" class="nav-item">Conectando...</a>
+            <a href="#" class="nav-item cart-icon">🛒 Carrito</a>
+        </nav>
+    </header>
+
+    <nav class="main-menu">
+        <!-- Estos enlaces apuntarán a sí mismos, pasando la categoría como parámetro -->
+        <a href="productos.html?cat=tecnologia" class="menu-item" data-category="tecnologia">Tecnología</a>
+        <a href="productos.html?cat=indumentaria" class="menu-item" data-category="indumentaria">Indumentaria</a>
+        <a href="productos.html?cat=hogar" class="menu-item" data-category="hogar">Hogar</a>
+        <a href="#" class="menu-item">Ofertas</a>
+        <a href="#" class="menu-item">Ayuda</a>
+    </nav>
+    
+    <!-- 2. CONTENIDO PRINCIPAL: BARRA LATERAL (FILTROS) Y LISTADO -->
+    <main class="container product-page-layout">
+        
+        <!-- BARRA LATERAL: FILTROS -->
+        <aside class="sidebar-filters">
+            <h3 id="current-category-title" class="filter-title">Categoría: Tecnología</h3>
+            
+            <!-- Bloque de Filtro de Rango de Precio -->
+            <div class="filter-group">
+                <h4><i class="fas fa-tags"></i> Precio</h4>
+                <div class="price-range">
+                    <input type="number" id="min-price" placeholder="Mínimo" value="0">
+                    <span>-</span>
+                    <input type="number" id="max-price" placeholder="Máximo">
+                    <button id="apply-price-filter" class="btn btn-small">Aplicar</button>
+                </div>
+            </div>
+
+            <!-- Bloque de Filtro de Marca (Común a todas las categorías) -->
+            <div class="filter-group">
+                <h4><i class="fas fa-building"></i> Marca</h4>
+                <ul class="filter-list" id="brand-filters">
+                    <li><label><input type="checkbox" data-filter="marca" value="Samsung"> Samsung</label></li>
+                    <li><label><input type="checkbox" data-filter="marca" value="Logitech"> Logitech</label></li>
+                    <li><label><input type="checkbox" data-filter="marca" value="Nike"> Nike</label></li>
+                    <li><label><input type="checkbox" data-filter="marca" value="Zara"> Zara</label></li>
+                    <li><label><input type="checkbox" data-filter="marca" value="Ikea"> Ikea</label></li>
+                </ul>
+                <button class="btn-clear-filter">Limpiar Marcas</button>
+            </div>
+
+            <!-- Bloque de Filtros Específicos (Talla / Capacidad / Material) -->
+            <!-- Se controlará con JS dependiendo de la categoría cargada -->
+            <div class="filter-group specific-filters" id="specific-filter-group">
+                <h4><i class="fas fa-list-alt"></i> Filtros Específicos</h4>
+                <!-- El contenido se inyectará aquí con JavaScript -->
+                <p class="placeholder-text">Filtros específicos aparecerán aquí (Ej: Talla, Memoria, Material).</p>
+            </div>
+        </aside>
+
+        <!-- ÁREA PRINCIPAL: LISTADO DE PRODUCTOS -->
+        <section class="product-listing">
+            <h2 id="listing-title">Cargando Productos...</h2>
+            
+            <div class="sort-options">
+                <label for="sort-by">Ordenar por:</label>
+                <select id="sort-by">
+                    <option value="default">Relevancia</option>
+                    <option value="price_asc">Precio (Menor a Mayor)</option>
+                    <option value="price_desc">Precio (Mayor a Menor)</option>
+                    <option value="name_asc">Nombre (A-Z)</option>
+                </select>
+            </div>
+
+            <!-- Aquí se inyectarán las tarjetas de producto -->
+            <div class="product-grid" id="product-listing-grid">
+                <!-- Los productos se cargan con JS -->
+                <p id="listing-loading-message">Iniciando conexión con Firebase...</p>
+            </div>
+            
+            <div class="pagination">
+                <button class="btn" disabled>Anterior</button>
+                <span>Página 1 de 5</span>
+                <button class="btn">Siguiente</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 3. FOOTER (REPETIDO DE INDEX.HTML) -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 MegaStore. Todos los derechos reservados.</p>
+            <nav class="footer-links">
+                <a href="#">Términos y Condiciones</a> | 
+                <a href="#">Política de Privacidad</a> | 
+                <a href="#">Contacto</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- 4. SCRIPTS DE FIREBASE Y JS (Módulos) -->
+    <!-- Módulos de Firebase y exposición de globales (Repetido del index.html) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setDoc, doc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
+        
+        // Configuraciones globales proporcionadas por el entorno
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // Inicialización de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // Debugging
+        setLogLevel('debug');
+        
+        // Autenticación
+        async function authenticate() {
+            try {
+                if (authToken) {
+                    await signInWithCustomToken(auth, authToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error durante la autenticación:", error);
+            }
+        }
+        
+        authenticate();
+
+        // Exponer variables globales para que el script de esta página pueda usarlas
+        window.db = db;
+        window.auth = auth;
+        window.getAuth = getAuth;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.getFirestore = getFirestore;
+        window.collection = collection;
+        window.query = query;
+        window.onSnapshot = onSnapshot;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.where = where; // ¡Necesitamos 'where' para los filtros!
+        
+        onAuthStateChanged(auth, (user) => {
+            const authStatus = document.getElementById('auth-status');
+            if (user) {
+                authStatus.textContent = `UID: ${user.uid.substring(0, 8)}...`;
+            } else {
+                authStatus.textContent = 'Ingresar';
+            }
+        });
+    </script>
+    
+    <!-- 5. Script Específico de la Página de Productos -->
+    <script type="module" src="js/productos.js"></script>
+
+</body>
+</html>

@@ -301,3 +301,110 @@ a {
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Menos columnas en móvil */
     }
 }
+/* -------------------------------------------------------------------- */
+/* 9. ESTILOS ESPECÍFICOS PARA LA PÁGINA DE PRODUCTOS (productos.html) */
+/* -------------------------------------------------------------------- */
+
+.product-page-layout {
+    display: flex;
+    gap: 30px; /* Espacio entre la barra lateral y los productos */
+    padding-top: 40px;
+}
+
+.sidebar-filters {
+    width: 280px; /* Ancho fijo para la barra lateral */
+    flex-shrink: 0; /* Evita que se encoja */
+    background-color: var(--color-background);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.product-listing {
+    flex-grow: 1; /* Permite que el listado de productos ocupe el resto del espacio */
+}
+
+.filter-title {
+    font-size: 1.4rem;
+    color: var(--color-primary);
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #ddd;
+}
+
+.filter-group h4 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.filter-list {
+    list-style: none;
+}
+
+.filter-list li {
+    margin-bottom: 8px;
+}
+
+.filter-list label {
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+/* Estilos de Rango de Precio */
+.price-range {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.price-range input {
+    width: 70px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+
+#apply-price-filter {
+    background-color: var(--color-secondary); /* Azul para la acción de filtro */
+}
+#apply-price-filter:hover {
+    background-color: #0060c0;
+}
+
+/* Opciones de Ordenación */
+.sort-options {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: var(--color-background);
+    border-radius: var(--border-radius);
+}
+
+.sort-options select {
+    padding: 8px;
+    border-radius: var(--border-radius);
+    border: 1px solid #ccc;
+}
+
+/* Responsividad para la página de productos (Móvil) */
+@media (max-width: 768px) {
+    .product-page-layout {
+        flex-direction: column; /* Apila la barra lateral y el listado */
+    }
+    .sidebar-filters {
+        width: 100%; /* La barra lateral ocupa todo el ancho */
+    }
+    .product-listing h2 {
+        text-align: center;
+    }
+}
