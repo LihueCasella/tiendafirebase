@@ -144,6 +144,10 @@
             try {
                 // Leer la variable global de configuración
                 const configString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+                
+                // *** DEBUG AGREGADO ***
+                console.debug("DEBUG: Valor crudo de __firebase_config:", configString);
+                
                 const config = JSON.parse(configString);
                 
                 // Verificar que tenga el projectId para considerarla válida
@@ -207,7 +211,7 @@
     </script>
     
     <!-- Enlace al script de lógica de productos -->
-    <script type="module" src="js/init_data.js"></script>
+    <script type="module" src="js/productos.js"></script>
     <!-- Si quieres inicializar datos, carga js/init_data.js aquí en lugar de js/productos.js una vez. -->
 
 </body>
