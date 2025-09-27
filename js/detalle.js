@@ -1,61 +1,7 @@
 // js/detalle.js
 // Lógica principal para la página de detalle del producto.
 
-// ----------------------------------------------------
-// 1. SIMULACIÓN DE DATOS (PARA COINCIDIR CON app.js)
-//    Estos datos simulan lo que obtendrás de la base de datos
-// ----------------------------------------------------
-
-// Para que la página de detalle funcione con la de inicio, usamos la misma fuente de datos simulada.
-// Se han añadido campos como 'brand', 'description' y 'specs' para que la página de detalle se vea completa.
-const allProducts = [
-    { 
-        id: 1, name: 'Mouse Glorious Model O 2', price: 132650, category: 'tecnologia', 
-        image: 'images/mouse-glorious.jpg', brand: 'Glorious', 
-        description: 'Experimenta un rendimiento inigualable con el mouse para juegos Glorious Model O 2, diseñado para ser ultraligero y preciso. Perfecto para largas sesiones de juego competitivo.',
-        specs: { 'Sensor': 'BAMF 2.0 26K', 'Peso': '59g', 'Switch': 'Glorious Switches (80M clics)', 'Conectividad': 'Inalámbrico 2.4GHz' }
-    },
-    { 
-        id: 2, name: 'Teclado Mecánico RGB', price: 168450, category: 'tecnologia', 
-        image: 'images/teclado-ejemplo.jpg', brand: 'KeyChron',
-        description: 'Un teclado mecánico 75% con retroiluminación RGB, switches intercambiables en caliente y una construcción de aluminio premium para una experiencia de escritura superior.',
-        specs: { 'Formato': '75%', 'Material': 'Aluminio', 'Switches': 'Gateron Red', 'RGB': 'Sí, por tecla' }
-    },
-    { 
-        id: 3, name: 'Chaqueta de Cuero Urbana', price: 95000, category: 'indumentaria', 
-        image: 'images/chaqueta-ejemplo.jpg', brand: 'UrbanStyle',
-        description: 'Un clásico atemporal. Esta chaqueta de cuero sintético de alta calidad ofrece un estilo rebelde y sofisticado, perfecta para cualquier ocasión.',
-        specs: { 'Material': 'Cuero sintético PU', 'Forro': 'Poliéster', 'Cierre': 'Cremallera metálica', 'Bolsillos': '3 exteriores, 1 interior' }
-    },
-    { 
-        id: 4, name: 'Jeans Slim Fit Hombre', price: 45000, category: 'indumentaria', 
-        image: 'images/jeans-ejemplo.jpg', brand: 'Denim Co.',
-        description: 'Jeans cómodos y duraderos con un corte slim fit que se adapta a tu figura. Hechos con una mezcla de algodón y elastano para mayor flexibilidad.',
-        specs: { 'Corte': 'Slim Fit', 'Material': '98% Algodón, 2% Elastano', 'Talles': '28 a 42', 'Origen': 'Nacional' }
-    },
-    { 
-        id: 5, name: 'Sillón Nórdico Individual', price: 280000, category: 'hogar', 
-        image: 'images/sillon-ejemplo.jpg', brand: 'HogarDeco',
-        description: 'Añade un toque de elegancia y confort a tu sala de estar con este sillón de estilo nórdico, tapizado en tela de lino de alta resistencia y patas de madera maciza.',
-        specs: { 'Estilo': 'Nórdico', 'Material': 'Lino y Madera de Paraíso', 'Dimensiones': '80cm x 75cm x 90cm', 'Colores': 'Gris, Beige, Azul' }
-    },
-    { 
-        id: 6, name: 'Juego de Sábanas King Size', price: 65000, category: 'hogar', 
-        image: 'images/sabanas-ejemplo.jpg', brand: 'SueñoReal',
-        description: 'Duerme como nunca antes con nuestro juego de sábanas de 400 hilos de algodón egipcio. Suavidad y frescura garantizadas para un descanso reparador.',
-        specs: { 'Tamaño': 'King Size (2x2m)', 'Material': '100% Algodón Egipcio', 'Hilos': '400', 'Incluye': 'Sábana, Sábana ajustable, 2 fundas' }
-    },
-    { 
-        id: 7, name: 'Monitor 27" Curvo 144Hz', price: 450000, category: 'tecnologia', 
-        image: 'images/monitor-ejemplo.jpg', brand: 'GamerTech',
-        description: 'Sumérgete en la acción con este monitor curvo de 27 pulgadas. Su tasa de refresco de 144Hz y 1ms de tiempo de respuesta te darán la ventaja competitiva que necesitas.',
-        specs: { 'Panel': 'VA Curvo 1500R', 'Resolución': '1920x1080', 'Tasa de Refresco': '144Hz', 'Tiempo de Respuesta': '1ms' }
-    },
-];
-
-// ----------------------------------------------------
-// 2. VARIABLES GLOBALES Y DOM
-// ----------------------------------------------------
+// ----------------------------------------------------\n// 1. VARIABLES GLOBALES Y DOM\n// ----------------------------------------------------\
 
 let currentProductId = null;
 let currentProductData = null; // Almacenará los datos del producto cargado
@@ -76,30 +22,43 @@ const DOMElements = {
     addToCartBtn: document.getElementById('add-to-cart-btn')
 };
 
-// ----------------------------------------------------
-// 3. FUNCIONES PRINCIPALES
-// ----------------------------------------------------
+// ----------------------------------------------------\n// 2. UTILIDADES\n// ----------------------------------------------------
 
+/**
+ * Lee la URL para obtener el parámetro 'id' (ID del producto).
+ * @returns {string | null} El ID del producto o null si no se encuentra.
+ */
 function getProductIdFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('id');
 }
 
+/**
+ * Muestra el contenido del producto y oculta el mensaje de carga.
+ */
 function showContent() {
-    DOMElements.loadingMessage.classList.add('hidden');
-    DOMElements.productContent.classList.remove('hidden');
-}
-
-function displayError(message) {
-    DOMElements.loadingMessage.textContent = `Error: ${message}`;
-    DOMElements.loadingMessage.style.color = 'red';
-    DOMElements.productContent.classList.add('hidden');
+    if (DOMElements.loadingMessage) DOMElements.loadingMessage.classList.add('hidden');
+    if (DOMElements.productContent) DOMElements.productContent.classList.remove('hidden');
 }
 
 /**
- * Carga el producto desde la lista simulada usando su ID.
+ * Muestra un error en la interfaz.
+ * @param {string} message - Mensaje de error a mostrar.
  */
-function loadProductDetails() {
+function displayError(message) {
+    if (DOMElements.loadingMessage) {
+        DOMElements.loadingMessage.textContent = `Error: ${message}`;
+        DOMElements.loadingMessage.style.color = 'red';
+    }
+    if (DOMElements.productContent) DOMElements.productContent.classList.add('hidden');
+}
+
+// ----------------------------------------------------\n// 3. CONSULTA A FIRESTORE Y RENDERIZADO\n// ----------------------------------------------------
+
+/**
+ * Carga el producto desde Firestore usando su ID.
+ */
+async function loadProductDetails() {
     currentProductId = getProductIdFromURL();
 
     if (!currentProductId) {
@@ -107,15 +66,29 @@ function loadProductDetails() {
         return;
     }
 
-    // Buscamos el producto en nuestra lista local.
-    // Usamos `==` en lugar de `===` porque el ID de la URL es un string y en el array es un número.
-    const product = allProducts.find(p => p.id == currentProductId);
+    // Espera a que la conexión con Firebase esté lista
+    if (!window.db || !window.doc || !window.getDoc) {
+        // Reintentar después de un breve retraso si Firebase no está listo
+        setTimeout(loadProductDetails, 100); 
+        return;
+    }
 
-    if (product) {
-        currentProductData = product; // Guardamos los datos para usarlos después (ej. al añadir al carrito)
-        renderProduct(product);
-    } else {
-        displayError(`El producto con ID "${currentProductId}" no existe.`);
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    
+    try {
+        const productDocRef = window.doc(window.db, `artifacts/${appId}/public/data/productos`, currentProductId);
+        const productSnap = await window.getDoc(productDocRef);
+
+        if (productSnap.exists()) {
+            // Asignamos el ID del documento a los datos del producto.
+            currentProductData = { id: productSnap.id, ...productSnap.data() };
+            renderProduct(currentProductData);
+        } else {
+            displayError(`El producto con ID "${currentProductId}" no existe.`);
+        }
+    } catch (error) {
+        console.error("Error al cargar detalles del producto:", error);
+        displayError("Error de base de datos al cargar el producto.");
     }
 }
 
@@ -149,11 +122,8 @@ function renderProduct(product) {
     showContent();
 }
 
-// ----------------------------------------------------
-// 4. LÓGICA DEL CARRITO Y COMPRA (USA LOCALSTORAGE)
-// ----------------------------------------------------
+// ----------------------------------------------------\n// 4. LÓGICA DEL CARRITO Y COMPRA\n// ----------------------------------------------------
 
-// Adaptamos las funciones del carrito para que usen localStorage, igual que en app.js
 const getCart = () => {
     const cart = localStorage.getItem('cart');
     return cart ? JSON.parse(cart) : [];
@@ -186,20 +156,18 @@ function addProductToCart() {
         cart.push({ 
             id: currentProductData.id, 
             name: currentProductData.name, 
-            price: currentProductData.price, 
+            price: currentProductData.price,
+            image: currentProductData.image,
             quantity: quantityToAdd 
         });
     }
 
     saveCart(cart);
     alert(`¡${quantityToAdd} unidad(es) de "${currentProductData.name}" se han añadido al carrito!`);
-    
-    // Opcional: Actualizar el contador del header si estuviera visible en esta página.
 }
 
-// ----------------------------------------------------
-// 5. INICIALIZACIÓN
-// ----------------------------------------------------
+
+// ----------------------------------------------------\n// 5. INICIALIZACIÓN\n// ----------------------------------------------------
 
 function setupEventListeners() {
     DOMElements.qtyMinus.addEventListener('click', () => updateQuantity(-1));

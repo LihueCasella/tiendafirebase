@@ -17,7 +17,7 @@ function initProductPage() {
     let currentCategory = urlParams.get('cat') || 'all';
     let currentFilters = {};
     let currentSort = 'default';
-    let allProducts = []; // <-- 1. Variable para guardar los productos cargados
+    let allProducts = [];
 
     const productGridEl = document.getElementById('product-listing-grid');
     const titleEl = document.getElementById('listing-title');
@@ -31,22 +31,26 @@ function initProductPage() {
 
     function renderProductCard(product) {
         const imageUrl = product.imagenUrl || `https://placehold.co/300x300/eee/333?text=${product.nombre.substring(0,10)}`;
+        // Envolvemos toda la tarjeta en un enlace
         return `
-            <div class="product-card">
-                <div class="product-image-container">
-                    <img src="${imageUrl}" alt="${product.nombre}" onerror="this.onerror=null; this.src='https://placehold.co/300x300/888/ffffff?text=No+Image';">
+            <a href="detalle.html?id=${product.id}" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-image-container">
+                        <img src="${imageUrl}" alt="${product.nombre}" onerror="this.onerror=null; this.src='https://placehold.co/300x300/888/ffffff?text=No+Image';">
+                    </div>
+                    <div class="product-details">
+                        <h3 title="${product.nombre}">${product.nombre}</h3>
+                        <p class="brand">${product.marca || 'Marca Desconocida'}</p>
+                        <p class="price">$${product.precio.toFixed(2)}</p>
+                        <button class="btn add-to-cart-btn" data-id="${product.id}">Añadir al Carrito</button>
+                    </div>
                 </div>
-                <div class="product-details">
-                    <h3 title="${product.nombre}">${product.nombre}</h3>
-                    <p class="brand">${product.marca || 'Marca Desconocida'}</p>
-                    <p class="price">$${product.precio.toFixed(2)}</p>
-                    <button class="btn add-to-cart-btn" data-id="${product.id}">Añadir al Carrito</button> <!-- 2. ID añadido al botón -->
-                </div>
-            </div>
+            </a>
         `;
     }
 
     function renderProducts(products) {
+        if (!productGridEl) return;
         productGridEl.innerHTML = '';
         if (products.length === 0) {
             productGridEl.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 50px;">No se encontraron productos.</p>';
@@ -119,11 +123,8 @@ function initProductPage() {
             products.push({ id: doc.id, ...doc.data() });
         });
         
-        allProducts = products; // <-- 3. Guardar productos en la variable global
+        allProducts = products;
         
-        // Aquí iría la lógica de filtrado en memoria y ordenamiento (si se necesita)
-        // ...
-
         renderProducts(products);
         updateDynamicFilters(products);
     }
@@ -133,6 +134,7 @@ function initProductPage() {
     // ----------------------------------------------------
 
     function updateDynamicFilters(products) {
+        if (!brandFilterListEl) return;
         const brands = [...new Set(products.map(p => p.marca).filter(Boolean))].sort();
         brandFilterListEl.innerHTML = brands.map(brand => `
             <li><label><input type="checkbox" name="marca" value="${brand}" ${(currentFilters.marca || []).includes(brand) ? 'checked' : ''}> ${brand}</label></li>
@@ -140,26 +142,34 @@ function initProductPage() {
     }
 
     function setupEventListeners() {
-        sortEl.addEventListener('change', () => {
-            currentSort = sortEl.value;
-            startListening();
-        });
-
-        brandFilterListEl.addEventListener('change', (e) => {
-            if (e.target.name === 'marca') {
-                const selected = Array.from(brandFilterListEl.querySelectorAll('input:checked')).map(i => i.value);
-                currentFilters.marca = selected;
+        if (sortEl) {
+            sortEl.addEventListener('change', () => {
+                currentSort = sortEl.value;
                 startListening();
-            }
-        });
+            });
+        }
 
-        // <-- 4. Escuchador de eventos para los botones de añadir
-        productGridEl.addEventListener('click', (e) => {
-            if (e.target.classList.contains('add-to-cart-btn')) {
-                const productId = e.target.getAttribute('data-id');
-                addToCart(productId, e.target);
-            }
-        });
+        if (brandFilterListEl) {
+            brandFilterListEl.addEventListener('change', (e) => {
+                if (e.target.name === 'marca') {
+                    const selected = Array.from(brandFilterListEl.querySelectorAll('input:checked')).map(i => i.value);
+                    currentFilters.marca = selected;
+                    startListening();
+                }
+            });
+        }
+
+        if (productGridEl) {
+            productGridEl.addEventListener('click', (e) => {
+                // Si el clic fue en un botón de carrito
+                if (e.target.classList.contains('add-to-cart-btn')) {
+                    // Prevenimos que el enlace de la tarjeta se active
+                    e.preventDefault();
+                    const productId = e.target.getAttribute('data-id');
+                    addToCart(productId, e.target);
+                }
+            });
+        }
     }
 
     // ----------------------------------------------------
@@ -169,13 +179,16 @@ function initProductPage() {
     let unsubscribe = null;
     function startListening() {
         if (unsubscribe) unsubscribe();
-        titleEl.textContent = currentCategory === 'all' ? 'Todos los Productos' : `Categoría: ${currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)}`;
-        loadingMessageEl.style.display = 'block';
-        productGridEl.innerHTML = '';
+        if (titleEl) {
+            titleEl.textContent = currentCategory === 'all' ? 'Todos los Productos' : `Categoría: ${currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)}`;
+        }
+        if (loadingMessageEl) loadingMessageEl.style.display = 'block';
+        if (productGridEl) productGridEl.innerHTML = '';
+        
         const q = buildQuery();
         unsubscribe = onSnapshot(q, handleSnapshot, (error) => {
             console.error("Error al escuchar productos:", error);
-            loadingMessageEl.textContent = "Error al cargar productos.";
+            if (loadingMessageEl) loadingMessageEl.textContent = "Error al cargar productos.";
         });
     }
 
