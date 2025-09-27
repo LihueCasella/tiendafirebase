@@ -10,7 +10,7 @@
     <!-- CSS Específico para Carrito -->
     <style>
         .cart-container {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 20px auto;
             padding: 20px;
             background-color: #ffffff;
@@ -24,72 +24,69 @@
             border-bottom: 2px solid #eee;
             padding-bottom: 10px;
         }
-        .cart-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
+
+        /* Estilos para la lista de items del carrito */
+        .cart-items-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 30px 0;
         }
-        .cart-table th, .cart-table td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .cart-table th {
-            background-color: #f8f8f8;
-            color: #555;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-        }
-        .cart-table td.product-details {
+        .cart-item {
             display: flex;
             align-items: center;
+            padding: 15px 10px;
+            border-bottom: 1px solid #f0f0f0;
         }
-        .cart-item-image {
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .item-image-link .cart-item-image {
             width: 80px;
             height: 80px;
             object-fit: cover;
-            margin-right: 15px;
             border-radius: 6px;
+            margin-right: 20px;
+            transition: transform 0.2s;
+        }
+        .item-image-link:hover .cart-item-image {
+            transform: scale(1.05);
+        }
+        .item-info {
+            flex-grow: 1;
+        }
+        .item-name-link {
+            text-decoration: none;
         }
         .item-name {
-            font-weight: 500;
+            display: block;
+            font-weight: 600;
             color: #333;
-        }
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .quantity-controls input {
-            width: 50px;
-            text-align: center;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 5px;
-        }
-        .quantity-controls button {
-            background-color: #f0f0f0;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .quantity-controls button:hover {
-            background-color: #e0e0e0;
-        }
-        .remove-btn {
-            color: #e63946;
-            background: none;
-            border: none;
-            cursor: pointer;
+            margin-bottom: 5px;
             font-size: 1.1rem;
-            transition: color 0.2s;
         }
-        .remove-btn:hover {
-            color: #a82430;
+        .item-name-link:hover .item-name {
+            color: #2a9d8f;
         }
+        .item-price {
+            color: #777;
+            font-size: 0.95rem;
+        }
+        .item-actions .remove-btn {
+            background: none;
+            border: 1px solid #e63946;
+            color: #e63946;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .item-actions .remove-btn:hover {
+            background-color: #e63946;
+            color: white;
+        }
+
+        /* Resumen de compra */
         .cart-summary {
             display: flex;
             justify-content: flex-end;
@@ -99,7 +96,7 @@
         }
         .summary-box {
             width: 100%;
-            max-width: 300px;
+            max-width: 350px;
             padding: 20px;
             background-color: #f9f9f9;
             border-radius: 8px;
@@ -144,41 +141,7 @@
             border: 1px dashed #ccc;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .cart-table th, .cart-table td {
-                padding: 10px 8px;
-                font-size: 0.9rem;
-            }
-            .cart-table thead {
-                display: none; /* Ocultar encabezados en móvil */
-            }
-            .cart-table tr {
-                display: block;
-                margin-bottom: 15px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-            }
-            .cart-table td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: none;
-            }
-            .cart-table td:before {
-                content: attr(data-label);
-                font-weight: bold;
-                margin-right: 10px;
-                color: #555;
-            }
-            .cart-table td.product-details {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .cart-summary {
-                justify-content: center;
-            }
-        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -201,9 +164,9 @@
     </header>
 
     <nav class="main-menu">
-        <a href="productos.html?cat=tecnologia" class="menu-item" data-category="tecnologia">Tecnología</a>
-        <a href="productos.html?cat=indumentaria" class="menu-item" data-category="indumentaria">Indumentaria</a>
-        <a href="productos.html?cat=hogar" class="menu-item" data-category="hogar">Hogar</a>
+        <a href="productos.html?cat=tecnologia" class="menu-item">Tecnología</a>
+        <a href="productos.html?cat=indumentaria" class="menu-item">Indumentaria</a>
+        <a href="productos.html?cat=hogar" class="menu-item">Hogar</a>
         <a href="#" class="menu-item">Ofertas</a>
         <a href="#" class="menu-item">Ayuda</a>
     </nav>
@@ -213,15 +176,17 @@
         <div class="cart-container">
             <h2 class="cart-title">Tu Carrito de Compras</h2>
             
+            <!-- Contenido del carrito: se inyectará la lista o el mensaje de vacío -->
             <div id="cart-content">
-                <!-- La tabla del carrito se inyectará aquí -->
-                <p id="loading-message" class="detail-loading">Cargando ítems del carrito...</p>
+                <!-- El script js/carrito.js llenará esta sección -->
             </div>
             
+            <p id="loading-message" class="detail-loading">Cargando ítems del carrito...</p>
+            
             <div id="empty-cart-view" class="empty-cart-message hidden">
-                <i class="fas fa-box-open fa-3x mb-3"></i>
+                <i class="fas fa-box-open fa-3x" style="margin-bottom: 15px;"></i>
                 <p>Tu carrito está vacío. ¡Empieza a comprar ahora!</p>
-                <a href="productos.html" class="btn checkout-btn" style="width: auto; background-color: #2a9d8f;">Ir a Productos</a>
+                <a href="productos.html" class="btn" style="display: inline-block; margin-top: 15px; background-color: #2a9d8f; color: white;">Ir a Productos</a>
             </div>
 
             <!-- Resumen de la Compra -->
@@ -239,7 +204,7 @@
     <!-- 3. FOOTER -->
     <footer class="footer">
         <div class="footer-content">
-            <p>&copy; 2025 MegaStore. Todos los derechos reservados.</p>
+            <p>&copy; 2025 MegaStore. Todos los derechos reservados a Lihue Casella.</p>
             <nav class="footer-links">
                 <a href="#">Términos y Condiciones</a> | 
                 <a href="#">Política de Privacidad</a> | 
@@ -248,54 +213,19 @@
         </div>
     </footer>
 
-    <!-- 4. SCRIPTS DE FIREBASE Y JS (Módulos) -->
+    <!-- 4. SCRIPTS GLOBALES -->
     <script type="module">
+        // Este script es solo para la autenticación y no interfiere con la lógica del carrito local
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Importamos getDoc, setDoc, updateDoc, deleteField, y los demás para la gestión del carrito
-        import { getFirestore, setDoc, updateDoc, doc, onSnapshot, collection, query, where, getDoc, increment, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
-        
-        // Configuraciones globales proporcionadas por el entorno
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        // Inicialización de Firebase
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
         const auth = getAuth(app);
-        
-        setLogLevel('debug');
-        
-        // Autenticación
-        async function authenticate() {
-            try {
-                if (authToken) {
-                    await signInWithCustomToken(auth, authToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Error durante la autenticación:", error);
-            }
-        }
-        
-        authenticate();
-
-        // Exponer variables globales
-        window.db = db;
-        window.auth = auth;
-        window.doc = doc;
-        window.onSnapshot = onSnapshot;
-        window.setDoc = setDoc;
-        window.updateDoc = updateDoc; // Necesario para ajustar cantidad
-        window.increment = increment;
-        window.deleteField = deleteField; // Necesario para eliminar producto
-
-        onAuthStateChanged(auth, (user) => {
+        signInAnonymously(auth).catch(e => console.error("Auth error", e));
+        onAuthStateChanged(auth, user => {
             const authStatus = document.getElementById('auth-status');
             if (user) {
-                authStatus.textContent = `UID: ${user.uid.substring(0, 8)}...`;
+                authStatus.textContent = 'Anónimo';
             } else {
                 authStatus.textContent = 'Ingresar';
             }
@@ -303,7 +233,7 @@
     </script>
     
     <!-- 5. Script Específico de la Página del Carrito -->
-    <script type="module" src="js/carrito.js"></script>
+    <script src="js/carrito.js"></script>
 
 </body>
 </html>
