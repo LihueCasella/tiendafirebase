@@ -161,6 +161,9 @@
         if (firebaseConfig === null) {
             authStatusEl.textContent = "Error: Configuración de Firebase Inválida.";
             console.error("Error de configuración: La configuración de Firebase no es válida o está ausente. La inicialización se detiene.");
+
+            // Exponer 'db = null' para que el script de productos sepa que falló
+            window.db = null;
         } else {
             // Inicializar Firebase
             const app = initializeApp(firebaseConfig);
@@ -170,7 +173,6 @@
             // Autenticación: Usar token provisto o iniciar sesión anónimamente
             async function authenticate() {
                 try {
-                    // La variable __initial_auth_token puede no estar definida, la comprobamos.
                     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
                     if (initialAuthToken) {
@@ -187,7 +189,7 @@
                 }
             }
 
-            // Exponer objetos y funciones de Firebase al alcance global (window)
+            // CORRECCIÓN CLAVE: Exponer los objetos de Firebase al alcance global (window)
             window.db = db;
             window.auth = auth;
             window.collection = collection;
