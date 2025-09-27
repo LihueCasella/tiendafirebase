@@ -57,7 +57,7 @@
         }
         .product-info-detail .price {
             font-size: 3rem;
-            color: #e63946; /* Color de énfasis */
+            color: #e63946;
             font-weight: 700;
             margin-bottom: 20px;
         }
@@ -94,7 +94,7 @@
             width: 40px;
             border-left: 1px solid #ccc;
             border-right: 1px solid #ccc;
-            -moz-appearance: textfield; /* Firefox */
+            -moz-appearance: textfield;
         }
         .quantity-control input::-webkit-outer-spin-button,
         .quantity-control input::-webkit-inner-spin-button {
@@ -103,54 +103,37 @@
         }
         .btn-add-to-cart {
             padding: 12px 30px;
-            background-color: #2a9d8f; /* Verde para acción */
+            background-color: #2a9d8f;
             color: white;
             font-weight: bold;
             border-radius: 8px;
             transition: background-color 0.3s;
         }
-        .btn-add-to-cart:hover {
+        .btn-add-to-cart:hover:not(:disabled) {
             background-color: #264653;
         }
+        .btn-add-to-cart:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .hidden { display: none; }
 
-        /* Responsive */
         @media (max-width: 768px) {
-            .detail-container {
-                flex-direction: column;
-                padding: 15px;
-                gap: 20px;
-            }
-            .product-info-detail {
-                padding-right: 0;
-            }
-            .product-info-detail h1 {
-                font-size: 2rem;
-            }
-            .product-info-detail .price {
-                font-size: 2.5rem;
-            }
-            .purchase-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .quantity-control {
-                width: 100%;
-                justify-content: center;
-            }
-            .btn-add-to-cart {
-                width: 100%;
-            }
+            .detail-container { flex-direction: column; padding: 15px; gap: 20px; }
+            .product-info-detail { padding-right: 0; }
+            .product-info-detail h1 { font-size: 2rem; }
+            .product-info-detail .price { font-size: 2.5rem; }
+            .purchase-actions { flex-direction: column; align-items: stretch; }
+            .quantity-control { width: 100%; justify-content: center; }
+            .btn-add-to-cart { width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. BARRA SUPERIOR Y NAVEGACIÓN PRINCIPAL (REPETIDO DE INDEX/PRODUCTOS.HTML) -->
     <header class="header">
         <div class="logo">
-            <a href="index.html" style="text-decoration: none; color: inherit;">
-                <h1>MegaStore</h1>
-            </a>
+            <a href="index.html" style="text-decoration: none; color: inherit;"><h1>MegaStore</h1></a>
         </div>
         <div class="search-bar">
             <input type="text" placeholder="Buscar productos...">
@@ -163,36 +146,25 @@
     </header>
 
     <nav class="main-menu">
-        <a href="productos.html?cat=tecnologia" class="menu-item" data-category="tecnologia">Tecnología</a>
-        <a href="productos.html?cat=indumentaria" class="menu-item" data-category="indumentaria">Indumentaria</a>
-        <a href="productos.html?cat=hogar" class="menu-item" data-category="hogar">Hogar</a>
+        <a href="productos.html?cat=tecnologia" class="menu-item">Tecnología</a>
+        <a href="productos.html?cat=indumentaria" class="menu-item">Indumentaria</a>
+        <a href="productos.html?cat=hogar" class="menu-item">Hogar</a>
         <a href="#" class="menu-item">Ofertas</a>
         <a href="#" class="menu-item">Ayuda</a>
     </nav>
     
-    <!-- 2. CONTENIDO PRINCIPAL: DETALLE DEL PRODUCTO -->
     <main class="container">
-        
         <div id="product-detail-area">
             <p class="detail-loading" id="loading-message">Cargando detalles del producto...</p>
-            
-            <!-- Aquí se inyectará el detalle completo del producto -->
             <div class="detail-container hidden" id="product-content">
-                
                 <div class="image-gallery">
                     <img id="detail-main-image" class="main-image" src="https://placehold.co/500x400/eeeeee/333333?text=Cargando..." alt="Imagen Principal del Producto">
-                    <!-- Podrían ir miniaturas aquí si tuvieras más imágenes -->
                 </div>
-
                 <div class="product-info-detail">
                     <h1 id="detail-name">Nombre del Producto</h1>
                     <p class="brand" id="detail-brand">Marca</p>
-                    
                     <div class="price" id="detail-price">$999.99</div>
-
                     <p class="description" id="detail-description">Descripción corta del producto. Se cargará la descripción completa aquí.</p>
-
-                    <!-- Acciones de Compra -->
                     <div class="purchase-actions">
                         <div class="quantity-control">
                             <button id="qty-minus" aria-label="Disminuir Cantidad">-</button>
@@ -203,23 +175,15 @@
                             <i class="fas fa-shopping-cart"></i> Añadir al Carrito
                         </button>
                     </div>
-
-                    <!-- Sección de Especificaciones (Inyectada por JS) -->
-                    <div class="specifications" id="detail-specs">
-                        <!-- Especificaciones como RAM, Talla, etc. -->
-                    </div>
+                    <div class="specifications" id="detail-specs"></div>
                 </div>
-
             </div>
-
         </div>
-
     </main>
 
-    <!-- 3. FOOTER (REPETIDO DE INDEX.HTML) -->
     <footer class="footer">
         <div class="footer-content">
-            <p>&copy; 2025 MegaStore. Todos los derechos reservados a Lihue Casella.</p>
+            <p>&copy; 2025 MegaStore. Todos los derechos reservados.</p>
             <nav class="footer-links">
                 <a href="#">Términos y Condiciones</a> | 
                 <a href="#">Política de Privacidad</a> | 
@@ -228,61 +192,170 @@
         </div>
     </footer>
 
-    <!-- 4. SCRIPTS DE FIREBASE Y JS (Módulos) -->
+    <!-- SCRIPT UNIFICADO: FIREBASE + LÓGICA DE DETALLE -->
     <script type="module">
+        // ====================================================
+        // PARTE 1: INICIALIZACIÓN DE FIREBASE
+        // ====================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Importamos todo lo necesario para leer documentos, escribir en carrito y actualizar
-        import { getFirestore, setDoc, doc, onSnapshot, collection, query, where, getDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
-        
-        // Configuraciones globales proporcionadas por el entorno
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
-        // Inicialización de Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            const auth = getAuth(app);
+            signInAnonymously(auth).catch(e => console.error("Auth error:", e));
+            onAuthStateChanged(auth, user => {
+                document.getElementById('auth-status').textContent = user ? 'Anónimo' : 'Ingresar';
+            });
+        } catch (e) {
+            console.error("Error inicializando Firebase:", e);
+            displayError("No se pudo conectar a la base de datos.");
+        }
+
+        // ====================================================
+        // PARTE 2: LÓGICA DE LA PÁGINA DE DETALLE
+        // ====================================================
         
-        setLogLevel('debug');
-        
-        // Autenticación
-        async function authenticate() {
+        let currentProductData = null;
+        const DOMElements = {
+            loadingMessage: document.getElementById('loading-message'),
+            productContent: document.getElementById('product-content'),
+            pageTitle: document.getElementById('page-title'),
+            mainImage: document.getElementById('detail-main-image'),
+            name: document.getElementById('detail-name'),
+            brand: document.getElementById('detail-brand'),
+            price: document.getElementById('detail-price'),
+            description: document.getElementById('detail-description'),
+            specs: document.getElementById('detail-specs'),
+            qtyMinus: document.getElementById('qty-minus'),
+            qtyPlus: document.getElementById('qty-plus'),
+            qtyInput: document.getElementById('qty-input'),
+            addToCartBtn: document.getElementById('add-to-cart-btn')
+        };
+
+        function getProductIdFromURL() {
+            return new URLSearchParams(window.location.search).get('id');
+        }
+
+        function showContent() {
+            DOMElements.loadingMessage.classList.add('hidden');
+            DOMElements.productContent.classList.remove('hidden');
+        }
+
+        function displayError(message) {
+            DOMElements.loadingMessage.textContent = `Error: ${message}`;
+            DOMElements.loadingMessage.classList.remove('hidden');
+            DOMElements.productContent.classList.add('hidden');
+        }
+
+        async function loadProductDetails() {
+            const productId = getProductIdFromURL();
+            if (!productId) {
+                return displayError("ID de producto no encontrado en la URL.");
+            }
+            if (!db) {
+                 return displayError("La conexión con la base de datos no está disponible.");
+            }
+
             try {
-                if (authToken) {
-                    await signInWithCustomToken(auth, authToken);
+                const productDocRef = doc(db, `artifacts/${appId}/public/data/productos`, productId);
+                const productSnap = await getDoc(productDocRef);
+
+                if (productSnap.exists()) {
+                    currentProductData = { id: productSnap.id, ...productSnap.data() };
+                    renderProduct(currentProductData);
                 } else {
-                    await signInAnonymously(auth);
+                    displayError(`El producto con ID "${productId}" no existe.`);
                 }
             } catch (error) {
-                console.error("Error durante la autenticación:", error);
+                console.error("Error al cargar producto:", error);
+                displayError("No se pudo cargar la información del producto.");
             }
         }
-        
-        authenticate();
 
-        // Exponer variables globales para que el script de esta página pueda usarlas
-        window.db = db;
-        window.auth = auth;
-        window.doc = doc;
-        window.getDoc = getDoc;
-        window.setDoc = setDoc;
-        window.increment = increment;
-        window.serverTimestamp = serverTimestamp;
-        
-        onAuthStateChanged(auth, (user) => {
-            const authStatus = document.getElementById('auth-status');
-            if (user) {
-                authStatus.textContent = `UID: ${user.uid.substring(0, 8)}...`;
+        function renderProduct(product) {
+            const priceNumber = Number(product.precio) || 0;
+            const formattedPrice = priceNumber.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+
+            DOMElements.pageTitle.textContent = `${product.nombre} | MegaStore`;
+            DOMElements.mainImage.src = product.image || 'https://placehold.co/500x400/eeeeee/333333?text=Sin+Imagen';
+            DOMElements.mainImage.alt = product.nombre;
+            DOMElements.name.textContent = product.nombre;
+            DOMElements.brand.textContent = product.marca ? `Marca: ${product.marca}` : 'Marca no especificada';
+            DOMElements.price.textContent = formattedPrice;
+            DOMElements.description.textContent = product.descripcion || 'Este producto no tiene descripción.';
+
+            let specsHtml = '<h4>Especificaciones</h4><ul>';
+            const technicalSpecs = product.especificaciones || {};
+            if (Object.keys(technicalSpecs).length > 0) {
+                for (const key in technicalSpecs) {
+                    specsHtml += `<li><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${technicalSpecs[key]}</li>`;
+                }
             } else {
-                authStatus.textContent = 'Ingresar';
+                specsHtml += '<li>No hay especificaciones adicionales.</li>';
             }
-        });
+            specsHtml += '</ul>';
+            DOMElements.specs.innerHTML = specsHtml;
+
+            DOMElements.addToCartBtn.disabled = false;
+            DOMElements.qtyMinus.disabled = false;
+            DOMElements.qtyPlus.disabled = false;
+
+            showContent();
+        }
+
+        const getCart = () => JSON.parse(localStorage.getItem('cart') || '[]');
+        const saveCart = (cart) => localStorage.setItem('cart', JSON.stringify(cart));
+
+        function updateQuantity(delta) {
+            let newQty = (parseInt(DOMElements.qtyInput.value) || 1) + delta;
+            if (newQty < 1) newQty = 1;
+            DOMElements.qtyInput.value = newQty;
+        }
+
+        function addProductToCart() {
+            if (!currentProductData) return alert("Los datos del producto aún no han cargado.");
+            
+            const quantityToAdd = parseInt(DOMElements.qtyInput.value) || 1;
+            const cart = getCart();
+            const productInCart = cart.find(item => item.id === currentProductData.id);
+
+            if (productInCart) {
+                productInCart.cantidad += quantityToAdd;
+            } else {
+                cart.push({
+                    id: currentProductData.id,
+                    nombre: currentProductData.nombre,
+                    precio: currentProductData.precio,
+                    image: currentProductData.image,
+                    cantidad: quantityToAdd
+                });
+            }
+            saveCart(cart);
+            alert(`"${currentProductData.nombre}" se ha añadido al carrito.`);
+        }
+
+        function initDetailPage() {
+            DOMElements.addToCartBtn.disabled = true;
+            DOMElements.qtyMinus.disabled = true;
+            DOMElements.qtyPlus.disabled = true;
+
+            DOMElements.qtyMinus.addEventListener('click', () => updateQuantity(-1));
+            DOMElements.qtyPlus.addEventListener('click', () => updateQuantity(1));
+            DOMElements.addToCartBtn.addEventListener('click', addProductToCart);
+
+            loadProductDetails();
+        }
+
+        // --- Ejecutar todo ---
+        initDetailPage();
     </script>
-    
-    <!-- 5. Script Específico de la Página de Detalle -->
-    <script type="module" src="js/detalle.js?v=3"></script>
 
 </body>
 </html>
