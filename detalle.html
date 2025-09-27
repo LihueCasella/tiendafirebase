@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="assets/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
-    <!-- CSS Específico para Detalle -->
     <style>
         .detail-container { display: flex; flex-direction: row; padding: 30px 20px; max-width: 1200px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); gap: 40px; }
         .detail-loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #555; }
@@ -39,13 +38,11 @@
     </style>
 </head>
 <body>
-
     <header class="header">
         <div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;"><h1>MegaStore</h1></a></div>
         <div class="search-bar"><input type="text" placeholder="Buscar productos..."><button aria-label="Buscar"><i class="fas fa-search"></i></button></div>
         <nav class="user-nav"><a href="#" id="auth-status" class="nav-item">Conectando...</a><a href="carrito.html" class="nav-item cart-icon">🛒 Carrito</a></nav>
     </header>
-
     <nav class="main-menu">
         <a href="productos.html?cat=tecnologia" class="menu-item">Tecnología</a>
         <a href="productos.html?cat=indumentaria" class="menu-item">Indumentaria</a>
@@ -82,15 +79,21 @@
         <div class="footer-content"><p>&copy; 2025 MegaStore. Todos los derechos reservados.</p><nav class="footer-links"><a href="#">Términos</a> | <a href="#">Privacidad</a> | <a href="#">Contacto</a></nav></div>
     </footer>
 
-    <!-- Script de Firebase -->
+    <!-- SCRIPT DE INICIALIZACIÓN DE FIREBASE (ROBUSTO) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        if (firebaseConfig.projectId) {
+        function initializeFirebase() {
+            if (typeof __firebase_config === 'undefined') {
+                console.warn("Configuración de Firebase no encontrada, reintentando en 100ms...");
+                setTimeout(initializeFirebase, 100);
+                return;
+            }
+
             try {
+                const firebaseConfig = JSON.parse(__firebase_config);
                 const app = initializeApp(firebaseConfig);
                 const db = getFirestore(app);
                 const auth = getAuth(app);
@@ -98,23 +101,31 @@
                 window.db = db;
                 window.doc = doc;
                 window.getDoc = getDoc;
-
+                
                 signInAnonymously(auth).catch(e => console.error("Auth error:", e));
                 onAuthStateChanged(auth, user => {
-                    document.getElementById('auth-status').textContent = user ? 'Anónimo' : 'Ingresar';
+                    const authStatus = document.getElementById('auth-status');
+                    if(authStatus) authStatus.textContent = user ? 'Anónimo' : 'Ingresar';
                 });
-            } catch(e) {
-                 console.error("Error inicializando Firebase:", e);
-                 document.getElementById('loading-message').textContent = "Error: No se pudo inicializar la conexión con la base de datos.";
+
+                console.log("Firebase está listo. Enviando señal 'firebase-ready'.");
+                document.dispatchEvent(new Event('firebase-ready'));
+
+            } catch (e) {
+                console.error("Error fatal al inicializar Firebase:", e);
+                const loadingMessage = document.getElementById('loading-message');
+                if (loadingMessage) {
+                    loadingMessage.textContent = "Error CRÍTICO: No se pudo conectar a la base de datos.";
+                    loadingMessage.style.color = 'red';
+                }
             }
-        } else {
-            console.error("Firebase config not found");
-            document.getElementById('loading-message').textContent = "Error: La configuración del servidor no fue encontrada.";
         }
+        
+        initializeFirebase();
     </script>
     
-    <!-- Script de la página de detalle -->
-    <script src="js/detalle.js"></script>
+    <!-- SCRIPT DE LA PÁGINA (ESCUCHA LA SEÑAL) -->
+    <script src="js/detalle.js" defer></script>
 
 </body>
 </html>

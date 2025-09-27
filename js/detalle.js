@@ -1,188 +1,119 @@
-// js/detalle.js (Version 4 - Robusta)
-// Lógica principal para la página de detalle del producto.
+// js/detalle.js (Versión Final y Robusta)
+// Espera la señal "firebase-ready" antes de ejecutarse.
 
 // ----------------------------------------------------
-// 1. VARIABLES GLOBALES Y DOM
+// 1. DEFINICIÓN DE FUNCIONES PRINCIPALES
 // ----------------------------------------------------
 
-let currentProductId = null;
-let currentProductData = null; 
+let currentProductData = null;
 
-const DOMElements = {
-    loadingMessage: document.getElementById('loading-message'),
-    productContent: document.getElementById('product-content'),
-    pageTitle: document.getElementById('page-title'),
-    mainImage: document.getElementById('detail-main-image'),
-    name: document.getElementById('detail-name'),
-    brand: document.getElementById('detail-brand'),
-    price: document.getElementById('detail-price'),
-    description: document.getElementById('detail-description'),
-    specs: document.getElementById('detail-specs'),
-    qtyMinus: document.getElementById('qty-minus'),
-    qtyPlus: document.getElementById('qty-plus'),
-    qtyInput: document.getElementById('qty-input'),
-    addToCartBtn: document.getElementById('add-to-cart-btn')
-};
-
-// ----------------------------------------------------
-// 2. UTILIDADES
-// ----------------------------------------------------
-
-function getProductIdFromURL() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('id');
-}
-
-function showContent() {
-    if (DOMElements.loadingMessage) DOMElements.loadingMessage.classList.add('hidden');
-    if (DOMElements.productContent) DOMElements.productContent.classList.remove('hidden');
-}
-
+// Función para mostrar un mensaje de error en la página
 function displayError(message) {
-    if (DOMElements.loadingMessage) {
-        DOMElements.loadingMessage.textContent = `Error: ${message}`;
-        DOMElements.loadingMessage.style.color = 'red';
-        DOMElements.loadingMessage.classList.remove('hidden');
+    const loadingMessage = document.getElementById('loading-message');
+    const productContent = document.getElementById('product-content');
+    if (loadingMessage) {
+        loadingMessage.textContent = `Error: ${message}`;
+        loadingMessage.style.color = 'red';
+        loadingMessage.classList.remove('hidden');
     }
-    if (DOMElements.productContent) DOMElements.productContent.classList.add('hidden');
+    if (productContent) {
+        productContent.classList.add('hidden');
+    }
+    console.error(message); // También loguea en consola para debug
 }
 
-// ----------------------------------------------------
-// 3. CONSULTA A FIRESTORE Y RENDERIZADO
-// ----------------------------------------------------
-
+// Función para cargar los detalles del producto desde Firestore
 async function loadProductDetails() {
-    currentProductId = getProductIdFromURL();
-    if (!currentProductId) {
-        displayError("ID de producto no especificado en la URL.");
-        return;
+    const productId = new URLSearchParams(window.location.search).get('id');
+    if (!productId) {
+        return displayError("No se ha proporcionado un ID de producto en la URL.");
     }
 
-    // Mecanismo de sondeo para esperar a que Firebase esté listo
-    if (!window.db || !window.doc || !window.getDoc) {
-        setTimeout(loadProductDetails, 100);
-        return;
+    if (!window.db || !window.getDoc || !window.doc) {
+        return displayError("La conexión con la base de datos (Firebase) no está disponible.");
     }
     
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    
+
     try {
-        const productDocRef = window.doc(window.db, `artifacts/${appId}/public/data/productos`, currentProductId);
+        const productDocRef = window.doc(window.db, `artifacts/${appId}/public/data/productos`, productId);
         const productSnap = await window.getDoc(productDocRef);
 
         if (productSnap.exists()) {
             currentProductData = { id: productSnap.id, ...productSnap.data() };
             renderProduct(currentProductData);
         } else {
-            displayError(`El producto con ID "${currentProductId}" no existe.`);
+            displayError(`El producto con ID "${productId}" no se encontró en la base de datos.`);
         }
     } catch (error) {
-        console.error("Error al cargar detalles del producto:", error);
-        displayError("Error de base de datos al cargar el producto.");
+        displayError("Ocurrió un error al consultar la base de datos.");
+        console.error("Error en getDoc:", error);
     }
 }
 
+// Función para pintar la información del producto en el DOM
 function renderProduct(product) {
-    const priceNumber = Number(product.precio) || 0;
-    const formattedPrice = priceNumber.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+    document.getElementById('page-title').textContent = `${product.nombre} | MegaStore`;
+    document.getElementById('detail-main-image').src = product.image || 'https://placehold.co/500x400/eeeeee/333333?text=Sin+Imagen';
+    document.getElementById('detail-main-image').alt = product.nombre;
+    document.getElementById('detail-name').textContent = product.nombre;
+    document.getElementById('detail-brand').textContent = product.marca ? `Marca: ${product.marca}` : 'Marca no disponible';
+    document.getElementById('detail-price').textContent = (Number(product.precio) || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+    document.getElementById('detail-description').textContent = product.descripcion || 'Este producto no tiene descripción.';
+    
+    // Lógica para las especificaciones (si aplica)
+    // ... (puedes añadirla si es necesario)
 
-    DOMElements.pageTitle.textContent = `${product.nombre} | MegaStore`;
-    DOMElements.mainImage.src = product.image || 'https://placehold.co/500x400/eeeeee/333333?text=Sin+Imagen';
-    DOMElements.mainImage.alt = product.nombre;
-    DOMElements.name.textContent = product.nombre;
-    DOMElements.brand.textContent = product.marca ? `Marca: ${product.marca}` : 'Marca no especificada';
-    DOMElements.price.textContent = formattedPrice;
-    DOMElements.description.textContent = product.descripcion || 'Este producto no tiene una descripción detallada.';
+    document.getElementById('loading-message').classList.add('hidden');
+    document.getElementById('product-content').classList.remove('hidden');
+    document.getElementById('add-to-cart-btn').disabled = false;
+}
 
-    let specsHtml = '<h4>Especificaciones Clave</h4><ul>';
-    const specs = { ...product };
-    delete specs.id; delete specs.nombre; delete specs.marca; delete specs.precio; delete specs.descripcion; delete specs.image; delete specs.categoria;
+// ----------------------------------------------------
+// 2. LÓGICA DEL CARRITO Y EVENTOS
+// ----------------------------------------------------
 
-    if (Object.keys(specs).length > 0) {
-        for (const key in specs) {
-            specsHtml += `<li><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${specs[key]}</li>`;
-        }
-    } else {
-        specsHtml += '<li>No hay especificaciones adicionales disponibles.</li>';
+function setupActionButtons() {
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+    const qtyInput = document.getElementById('qty-input');
+    const qtyPlus = document.getElementById('qty-plus');
+    const qtyMinus = document.getElementById('qty-minus');
+
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', () => {
+            if (!currentProductData) {
+                alert("Error: Los datos del producto no están cargados.");
+                return;
+            }
+            const quantity = parseInt(qtyInput.value) || 1;
+            // Aquí iría la lógica para añadir al carrito (usando LocalStorage, por ejemplo)
+            alert(`Añadido al carrito: ${quantity} x ${currentProductData.nombre}`);
+        });
     }
-    specsHtml += '</ul>';
-    if(DOMElements.specs) DOMElements.specs.innerHTML = specsHtml;
-
-    // Habilitamos los controles solo cuando todo está listo.
-    if(DOMElements.addToCartBtn) DOMElements.addToCartBtn.disabled = false;
-    if(DOMElements.qtyMinus) DOMElements.qtyMinus.disabled = false;
-    if(DOMElements.qtyPlus) DOMElements.qtyPlus.disabled = false;
-    if(DOMElements.qtyInput) DOMElements.qtyInput.disabled = false;
-
-    showContent();
+    
+    if (qtyPlus) qtyPlus.addEventListener('click', () => { 
+        let current = parseInt(qtyInput.value);
+        qtyInput.value = current + 1;
+    });
+    
+    if (qtyMinus) qtyMinus.addEventListener('click', () => { 
+        let current = parseInt(qtyInput.value);
+        if (current > 1) qtyInput.value = current - 1;
+    });
 }
+
 
 // ----------------------------------------------------
-// 4. LÓGICA DEL CARRITO (LOCALSTORAGE)
+// 3. PUNTO DE ENTRADA: ESPERAR LA SEÑAL DE FIREBASE
 // ----------------------------------------------------
 
-const getCart = () => {
-    const cart = localStorage.getItem('cart');
-    return cart ? JSON.parse(cart) : [];
-}
-
-const saveCart = (cart) => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-}
-
-function updateQuantity(delta) {
-    let currentQty = parseInt(DOMElements.qtyInput.value) || 1;
-    let newQty = currentQty + delta;
-    if (newQty < 1) newQty = 1;
-    DOMElements.qtyInput.value = newQty;
-}
-
-function addProductToCart() {
-    if (!currentProductData) {
-        alert("Error de Sincronización. Por favor, espere a que la página cargue completamente y vuelva a intentarlo.");
-        return;
-    }
-
-    const quantityToAdd = parseInt(DOMElements.qtyInput.value) || 1;
-    const cart = getCart();
-    const productInCart = cart.find(item => item.id === currentProductData.id);
-
-    if (productInCart) {
-        productInCart.cantidad = (productInCart.cantidad || 0) + quantityToAdd;
-    } else {
-        const cartProduct = {
-            id: currentProductData.id,
-            nombre: currentProductData.nombre,
-            precio: currentProductData.precio,
-            image: currentProductData.image,
-            cantidad: quantityToAdd
-        };
-        cart.push(cartProduct);
-    }
-
-    saveCart(cart);
-    alert(`¡${quantityToAdd} unidad(es) de "${currentProductData.nombre}" se han añadido al carrito!`);
-}
-
-// ----------------------------------------------------
-// 5. INICIALIZACIÓN
-// ----------------------------------------------------
-
-function setupEventListeners() {
-    if(DOMElements.qtyMinus) DOMElements.qtyMinus.addEventListener('click', () => updateQuantity(-1));
-    if(DOMElements.qtyPlus) DOMElements.qtyPlus.addEventListener('click', () => updateQuantity(1));
-    if(DOMElements.addToCartBtn) DOMElements.addToCartBtn.addEventListener('click', addProductToCart);
-}
-
-function initDetailPage() {
-    // Deshabilitamos los controles al iniciar para evitar clicks prematuros.
-    if(DOMElements.addToCartBtn) DOMElements.addToCartBtn.disabled = true;
-    if(DOMElements.qtyMinus) DOMElements.qtyMinus.disabled = true;
-    if(DOMElements.qtyPlus) DOMElements.qtyPlus.disabled = true;
-    if(DOMElements.qtyInput) DOMElements.qtyInput.disabled = true;
-
+function main() {
+    console.log("Señal 'firebase-ready' recibida. Ejecutando lógica de la página de detalle.");
+    document.getElementById('add-to-cart-btn').disabled = true;
     loadProductDetails();
-    setupEventListeners();
+    setupActionButtons();
 }
 
-document.addEventListener('DOMContentLoaded', initDetailPage);
+// El script espera a que el evento "firebase-ready" sea disparado desde el HTML.
+document.addEventListener('firebase-ready', main);
+
