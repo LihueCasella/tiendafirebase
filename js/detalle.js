@@ -1,4 +1,4 @@
-// js/detalle.js
+// js/detalle.js (Version 3 - Final)
 // Lógica principal para la página de detalle del producto.
 
 // ----------------------------------------------------
@@ -6,7 +6,7 @@
 // ----------------------------------------------------
 
 let currentProductId = null;
-let currentProductData = null; // Almacenará los datos del producto cargado
+let currentProductData = null; 
 
 const DOMElements = {
     loadingMessage: document.getElementById('loading-message'),
@@ -42,6 +42,7 @@ function displayError(message) {
     if (DOMElements.loadingMessage) {
         DOMElements.loadingMessage.textContent = `Error: ${message}`;
         DOMElements.loadingMessage.style.color = 'red';
+        DOMElements.loadingMessage.classList.remove('hidden');
     }
     if (DOMElements.productContent) DOMElements.productContent.classList.add('hidden');
 }
@@ -52,7 +53,6 @@ function displayError(message) {
 
 async function loadProductDetails() {
     currentProductId = getProductIdFromURL();
-
     if (!currentProductId) {
         displayError("ID de producto no especificado en la URL.");
         return;
@@ -62,7 +62,7 @@ async function loadProductDetails() {
         setTimeout(loadProductDetails, 100); 
         return;
     }
-
+    
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     
     try {
@@ -70,7 +70,6 @@ async function loadProductDetails() {
         const productSnap = await window.getDoc(productDocRef);
 
         if (productSnap.exists()) {
-            // ¡CORRECCIÓN! Guardamos los datos del producto en la variable global
             currentProductData = { id: productSnap.id, ...productSnap.data() };
             renderProduct(currentProductData);
         } else {
@@ -96,7 +95,6 @@ function renderProduct(product) {
 
     let specsHtml = '<h4>Especificaciones Clave</h4><ul>';
     const specs = { ...product };
-    // Eliminamos los campos que no son especificaciones para no mostrarlos dos veces
     delete specs.id; delete specs.nombre; delete specs.marca; delete specs.precio; delete specs.descripcion; delete specs.image; delete specs.categoria;
 
     if (Object.keys(specs).length > 0) {
@@ -107,7 +105,13 @@ function renderProduct(product) {
         specsHtml += '<li>No hay especificaciones adicionales disponibles.</li>';
     }
     specsHtml += '</ul>';
-    DOMElements.specs.innerHTML = specsHtml;
+    if(DOMElements.specs) DOMElements.specs.innerHTML = specsHtml;
+
+    // Habilitamos los controles solo cuando todo está listo.
+    if(DOMElements.addToCartBtn) DOMElements.addToCartBtn.disabled = false;
+    if(DOMElements.qtyMinus) DOMElements.qtyMinus.disabled = false;
+    if(DOMElements.qtyPlus) DOMElements.qtyPlus.disabled = false;
+    if(DOMElements.qtyInput) DOMElements.qtyInput.disabled = false;
 
     showContent();
 }
@@ -133,9 +137,9 @@ function updateQuantity(delta) {
 }
 
 function addProductToCart() {
-    // Esta función ahora encontrará los datos en 'currentProductData'
     if (!currentProductData) {
-        alert("Error: No hay datos del producto.");
+        // MENSAJE DE DIAGNÓSTICO
+        alert("Error de Sincronización (vF). El script no está actualizado. Por favor, recargue la página con CTRL+F5 y vuelva a intentarlo.");
         return;
     }
 
@@ -165,12 +169,18 @@ function addProductToCart() {
 // ----------------------------------------------------
 
 function setupEventListeners() {
-    DOMElements.qtyMinus.addEventListener('click', () => updateQuantity(-1));
-    DOMElements.qtyPlus.addEventListener('click', () => updateQuantity(1));
-    DOMElements.addToCartBtn.addEventListener('click', addProductToCart);
+    if(DOMElements.qtyMinus) DOMElements.qtyMinus.addEventListener('click', () => updateQuantity(-1));
+    if(DOMElements.qtyPlus) DOMElements.qtyPlus.addEventListener('click', () => updateQuantity(1));
+    if(DOMElements.addToCartBtn) DOMElements.addToCartBtn.addEventListener('click', addProductToCart);
 }
 
 function initDetailPage() {
+    // Deshabilitamos los controles al iniciar para evitar clicks prematuros.
+    if(DOMElements.addToCartBtn) DOMElements.addToCartBtn.disabled = true;
+    if(DOMElements.qtyMinus) DOMElements.qtyMinus.disabled = true;
+    if(DOMElements.qtyPlus) DOMElements.qtyPlus.disabled = true;
+    if(DOMElements.qtyInput) DOMElements.qtyInput.disabled = true;
+
     loadProductDetails();
     setupEventListeners();
 }
