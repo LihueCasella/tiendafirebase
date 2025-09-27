@@ -30,15 +30,13 @@ const allProducts = [
 // 3. FUNCIONES DE RENDERING (Carga de Productos)
 // ----------------------------------------------------
 
-/**
- * Función que toma un array de productos y los inyecta en el DOM.
- * @param {Array} productsToRender - Lista de productos filtrados a mostrar.
- */
 function renderProducts(productsToRender) {
+    // Si no encontramos el productGrid (ej. en otra página), no hacemos nada.
+    if (!productGrid) return;
+
     productGrid.innerHTML = ''; // Limpia la grilla antes de renderizar
 
     productsToRender.forEach(product => {
-        // ENVOLVEMOS LA TARJETA EN UN ENLACE '<a>' a la página de detalle.
         const cardHTML = `
             <a href="detalle.html?id=${product.id}" class="product-card-link">
                 <article class="product-card" data-id="${product.id}" data-category="${product.category}">
@@ -54,13 +52,10 @@ function renderProducts(productsToRender) {
         productGrid.innerHTML += cardHTML;
     });
 
-    // Añade el Event Listener a los nuevos botones de carrito
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', (e) => {
-            // PREVENIMOS que el click en el botón active el enlace de la tarjeta.
             e.preventDefault();
             e.stopPropagation();
-
             const productId = parseInt(e.target.dataset.id);
             addToCart(productId);
         });
@@ -68,78 +63,43 @@ function renderProducts(productsToRender) {
 }
 
 // ----------------------------------------------------
-// 4. LÓGICA DE FIRESTORE (Cómo se vería la integración real)
+// 4. LÓGICA DE DATOS
 // ----------------------------------------------------
 
-/**
- * Función que obtendría los productos filtrados de Firestore.
- * NOTA: Esta función es solo una demostración. Usa la simulación 'allProducts' por ahora.
- */
-async function getProductsFromFirestore(category = 'tecnologia') {
-    // 1. Usar la simulación temporal
+function getProducts(category = 'tecnologia') {
     const filteredProducts = allProducts.filter(p => p.category === category);
     renderProducts(filteredProducts);
-    
-    /* // 2. CÓDIGO REAL PARA FIRESTORE (descomentar y probar en el futuro)
-    try {
-        const productsRef = db.collection('productos');
-        const querySnapshot = await productsRef.where('category', '==', category).get();
-        
-        const firestoreProducts = [];
-        querySnapshot.forEach(doc => {
-            firestoreProducts.push({ id: doc.id, ...doc.data() });
-        });
-        
-        renderProducts(firestoreProducts);
-    } catch (error) {
-        console.error("Error al obtener productos de Firestore: ", error);
-        // Opcional: mostrar un mensaje al usuario
-    }
-    */
 }
-
 
 // ----------------------------------------------------
 // 5. MANEJO DE PESTAÑAS (Tabs de Categoría)
 // ----------------------------------------------------
 
-tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        // 1. Obtener la categoría a filtrar (el texto del botón en minúsculas)
-        const newCategory = button.textContent.trim().toLowerCase().split(' ')[0]; 
-
-        // 2. Actualizar estilos (botón activo)
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-
-        // 3. Cargar y renderizar los productos de esa categoría
-        getProductsFromFirestore(newCategory);
+if (tabButtons.length > 0) {
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const newCategory = button.textContent.trim().toLowerCase().split(' ')[0];
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            getProducts(newCategory);
+        });
     });
-});
+}
 
 // ----------------------------------------------------
 // 6. LÓGICA BÁSICA DEL CARRITO (Usando localStorage)
 // ----------------------------------------------------
 
-/**
- * Inicializa o recupera el carrito de localStorage.
- */
 const getCart = () => {
     const cart = localStorage.getItem('cart');
     return cart ? JSON.parse(cart) : [];
 }
 
-/**
- * Guarda el carrito en localStorage.
- */
 const saveCart = (cart) => {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
 }
 
-/**
- * Añade un producto al carrito.
- */
 function addToCart(productId) {
     const cart = getCart();
     const productExists = cart.find(item => item.id === productId);
@@ -157,14 +117,10 @@ function addToCart(productId) {
     alert(`Producto añadido: ${allProducts.find(p => p.id === productId).name}`);
 }
 
-/**
- * Actualiza el número de ítems en el icono del carrito.
- */
 function updateCartCount() {
+    if (!cartIcon) return;
     const cart = getCart();
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    
-    // Muestra el número al lado del icono 🛒
     cartIcon.textContent = `🛒 Carrito (${totalItems})`;
 }
 
@@ -172,10 +128,11 @@ function updateCartCount() {
 // 7. INICIALIZACIÓN DE LA APLICACIÓN
 // ----------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Cargar la pestaña inicial (Tecnología)
-    getProductsFromFirestore('tecnologia'); 
+// Cargar la pestaña inicial (Tecnología) por defecto en la página de inicio.
+// Esto se ejecuta en cuanto el script carga, que es después de que el DOM esté listo.
+if (document.querySelector('.product-grid')) {
+    getProducts('tecnologia'); 
+}
 
-    // 2. Inicializar el contador del carrito
-    updateCartCount();
-});
+// Inicializar el contador del carrito en todas las páginas.
+updateCartCount();
