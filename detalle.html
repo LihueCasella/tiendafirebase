@@ -7,117 +7,25 @@
     <link rel="stylesheet" href="assets/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
-    <!-- CSS Específico para Detalle -->
     <style>
-        .detail-container {
-            display: flex;
-            flex-direction: row;
-            padding: 30px 20px;
-            max-width: 1200px;
-            margin: 20px auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            gap: 40px;
-        }
-        .detail-loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 1.2rem;
-            color: #555;
-        }
-        .image-gallery {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .main-image {
-            width: 100%;
-            max-width: 500px;
-            height: auto;
-            object-fit: contain;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        .product-info-detail {
-            flex: 1;
-            padding-right: 20px;
-        }
-        .product-info-detail h1 {
-            font-size: 2.5rem;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        .product-info-detail .brand {
-            font-size: 1rem;
-            color: #888;
-            margin-bottom: 20px;
-        }
-        .product-info-detail .price {
-            font-size: 3rem;
-            color: #e63946;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-        .product-info-detail .description {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            color: #555;
-        }
-        .purchase-actions {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-        .quantity-control button, .quantity-control input {
-            padding: 10px 15px;
-            border: none;
-            background: none;
-            font-size: 1.1rem;
-            cursor: pointer;
-            width: 50px;
-            text-align: center;
-        }
-        .quantity-control input {
-            width: 40px;
-            border-left: 1px solid #ccc;
-            border-right: 1px solid #ccc;
-            -moz-appearance: textfield;
-        }
-        .quantity-control input::-webkit-outer-spin-button,
-        .quantity-control input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .btn-add-to-cart {
-            padding: 12px 30px;
-            background-color: #2a9d8f;
-            color: white;
-            font-weight: bold;
-            border-radius: 8px;
-            transition: background-color 0.3s;
-        }
-        .btn-add-to-cart:hover:not(:disabled) {
-            background-color: #264653;
-        }
-        .btn-add-to-cart:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
+        .detail-container { display: flex; flex-direction: row; padding: 30px 20px; max-width: 1200px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); gap: 40px; }
+        .detail-loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #555; }
+        .image-gallery { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .main-image { width: 100%; max-width: 500px; height: auto; object-fit: contain; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .product-info-detail { flex: 1; padding-right: 20px; }
+        .product-info-detail h1 { font-size: 2.5rem; color: #333; margin-bottom: 5px; }
+        .product-info-detail .brand { font-size: 1rem; color: #888; margin-bottom: 20px; }
+        .product-info-detail .price { font-size: 3rem; color: #e63946; font-weight: 700; margin-bottom: 20px; }
+        .product-info-detail .description { font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px; color: #555; }
+        .purchase-actions { display: flex; align-items: center; gap: 20px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+        .quantity-control { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 6px; }
+        .quantity-control button, .quantity-control input { padding: 10px 15px; border: none; background: none; font-size: 1.1rem; cursor: pointer; width: 50px; text-align: center; }
+        .quantity-control input { width: 40px; border-left: 1px solid #ccc; border-right: 1px solid #ccc; -moz-appearance: textfield; }
+        .quantity-control input::-webkit-outer-spin-button, .quantity-control input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .btn-add-to-cart { padding: 12px 30px; background-color: #2a9d8f; color: white; font-weight: bold; border-radius: 8px; transition: background-color 0.3s; }
+        .btn-add-to-cart:hover:not(:disabled) { background-color: #264653; }
+        .btn-add-to-cart:disabled { background-color: #ccc; cursor: not-allowed; }
         .hidden { display: none; }
-
         @media (max-width: 768px) {
             .detail-container { flex-direction: column; padding: 15px; gap: 20px; }
             .product-info-detail { padding-right: 0; }
@@ -130,21 +38,11 @@
     </style>
 </head>
 <body>
-
     <header class="header">
-        <div class="logo">
-            <a href="index.html" style="text-decoration: none; color: inherit;"><h1>MegaStore</h1></a>
-        </div>
-        <div class="search-bar">
-            <input type="text" placeholder="Buscar productos...">
-            <button aria-label="Buscar"><i class="fas fa-search"></i></button>
-        </div>
-        <nav class="user-nav">
-            <a href="#" id="auth-status" class="nav-item">Conectando...</a>
-            <a href="carrito.html" class="nav-item cart-icon">🛒 Carrito</a>
-        </nav>
+        <div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;"><h1>MegaStore</h1></a></div>
+        <div class="search-bar"><input type="text" placeholder="Buscar productos..."><button aria-label="Buscar"><i class="fas fa-search"></i></button></div>
+        <nav class="user-nav"><a href="#" id="auth-status" class="nav-item">Conectando...</a><a href="carrito.html" class="nav-item cart-icon">🛒 Carrito</a></nav>
     </header>
-
     <nav class="main-menu">
         <a href="productos.html?cat=tecnologia" class="menu-item">Tecnología</a>
         <a href="productos.html?cat=indumentaria" class="menu-item">Indumentaria</a>
@@ -152,196 +50,162 @@
         <a href="#" class="menu-item">Ofertas</a>
         <a href="#" class="menu-item">Ayuda</a>
     </nav>
-    
     <main class="container">
         <div id="product-detail-area">
             <p class="detail-loading" id="loading-message">Cargando detalles del producto...</p>
             <div class="detail-container hidden" id="product-content">
-                <div class="image-gallery">
-                    <img id="detail-main-image" class="main-image" src="https://placehold.co/500x400/eeeeee/333333?text=Cargando..." alt="Imagen Principal del Producto">
-                </div>
+                <div class="image-gallery"><img id="detail-main-image" class="main-image" src="https://placehold.co/500x400/eeeeee/333333?text=Cargando..." alt="Imagen Principal"></div>
                 <div class="product-info-detail">
-                    <h1 id="detail-name">Nombre del Producto</h1>
-                    <p class="brand" id="detail-brand">Marca</p>
-                    <div class="price" id="detail-price">$999.99</div>
-                    <p class="description" id="detail-description">Descripción corta del producto. Se cargará la descripción completa aquí.</p>
+                    <h1 id="detail-name">...</h1>
+                    <p class="brand" id="detail-brand">...</p>
+                    <div class="price" id="detail-price">...</div>
+                    <p class="description" id="detail-description">...</p>
                     <div class="purchase-actions">
                         <div class="quantity-control">
-                            <button id="qty-minus" aria-label="Disminuir Cantidad">-</button>
-                            <input type="number" id="qty-input" value="1" min="1" max="100" readonly>
-                            <button id="qty-plus" aria-label="Aumentar Cantidad">+</button>
+                            <button id="qty-minus" aria-label="-">-</button>
+                            <input type="number" id="qty-input" value="1" min="1" readonly>
+                            <button id="qty-plus" aria-label="+">+</button>
                         </div>
-                        <button id="add-to-cart-btn" class="btn-add-to-cart">
-                            <i class="fas fa-shopping-cart"></i> Añadir al Carrito
-                        </button>
+                        <button id="add-to-cart-btn" class="btn-add-to-cart"><i class="fas fa-shopping-cart"></i> Añadir</button>
                     </div>
                     <div class="specifications" id="detail-specs"></div>
                 </div>
             </div>
         </div>
     </main>
-
     <footer class="footer">
-        <div class="footer-content">
-            <p>&copy; 2025 MegaStore. Todos los derechos reservados.</p>
-            <nav class="footer-links">
-                <a href="#">Términos y Condiciones</a> | 
-                <a href="#">Política de Privacidad</a> | 
-                <a href="#">Contacto</a>
-            </nav>
-        </div>
+        <div class="footer-content"><p>&copy; 2025 MegaStore. Todos los derechos reservados.</p><nav class="footer-links"><a href="#">Términos</a> | <a href="#">Privacidad</a> | <a href="#">Contacto</a></nav></div>
     </footer>
 
-    <!-- SCRIPT UNIFICADO: FIREBASE + LÓGICA DE DETALLE -->
     <script type="module">
         // ====================================================
-        // PARTE 1: INICIALIZACIÓN DE FIREBASE
+        // SCRIPT UNIFICADO Y DEFINITIVO
         // ====================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        let db;
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            const auth = getAuth(app);
-            signInAnonymously(auth).catch(e => console.error("Auth error:", e));
-            onAuthStateChanged(auth, user => {
-                document.getElementById('auth-status').textContent = user ? 'Anónimo' : 'Ingresar';
-            });
-        } catch (e) {
-            console.error("Error inicializando Firebase:", e);
-            displayError("No se pudo conectar a la base de datos.");
-        }
-
-        // ====================================================
-        // PARTE 2: LÓGICA DE LA PÁGINA DE DETALLE
-        // ====================================================
-        
-        let currentProductData = null;
-        const DOMElements = {
-            loadingMessage: document.getElementById('loading-message'),
-            productContent: document.getElementById('product-content'),
-            pageTitle: document.getElementById('page-title'),
-            mainImage: document.getElementById('detail-main-image'),
-            name: document.getElementById('detail-name'),
-            brand: document.getElementById('detail-brand'),
-            price: document.getElementById('detail-price'),
-            description: document.getElementById('detail-description'),
-            specs: document.getElementById('detail-specs'),
-            qtyMinus: document.getElementById('qty-minus'),
-            qtyPlus: document.getElementById('qty-plus'),
-            qtyInput: document.getElementById('qty-input'),
-            addToCartBtn: document.getElementById('add-to-cart-btn')
-        };
-
-        function getProductIdFromURL() {
-            return new URLSearchParams(window.location.search).get('id');
-        }
-
-        function showContent() {
-            DOMElements.loadingMessage.classList.add('hidden');
-            DOMElements.productContent.classList.remove('hidden');
-        }
-
-        function displayError(message) {
-            DOMElements.loadingMessage.textContent = `Error: ${message}`;
-            DOMElements.loadingMessage.classList.remove('hidden');
-            DOMElements.productContent.classList.add('hidden');
-        }
-
-        async function loadProductDetails() {
-            const productId = getProductIdFromURL();
-            if (!productId) {
-                return displayError("ID de producto no encontrado en la URL.");
-            }
-            if (!db) {
-                 return displayError("La conexión con la base de datos no está disponible.");
-            }
-
+        function initApp() {
+            // --- 1. Inicialización de Firebase ---
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            let db;
             try {
-                const productDocRef = doc(db, `artifacts/${appId}/public/data/productos`, productId);
-                const productSnap = await getDoc(productDocRef);
-
-                if (productSnap.exists()) {
-                    currentProductData = { id: productSnap.id, ...productSnap.data() };
-                    renderProduct(currentProductData);
-                } else {
-                    displayError(`El producto con ID "${productId}" no existe.`);
-                }
-            } catch (error) {
-                console.error("Error al cargar producto:", error);
-                displayError("No se pudo cargar la información del producto.");
-            }
-        }
-
-        function renderProduct(product) {
-            const priceNumber = Number(product.precio) || 0;
-            const formattedPrice = priceNumber.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-
-            DOMElements.pageTitle.textContent = `${product.nombre} | MegaStore`;
-            DOMElements.mainImage.src = product.image || 'https://placehold.co/500x400/eeeeee/333333?text=Sin+Imagen';
-            DOMElements.mainImage.alt = product.nombre;
-            DOMElements.name.textContent = product.nombre;
-            DOMElements.brand.textContent = product.marca ? `Marca: ${product.marca}` : 'Marca no especificada';
-            DOMElements.price.textContent = formattedPrice;
-            DOMElements.description.textContent = product.descripcion || 'Este producto no tiene descripción.';
-
-            let specsHtml = '<h4>Especificaciones</h4><ul>';
-            const technicalSpecs = product.especificaciones || {};
-            if (Object.keys(technicalSpecs).length > 0) {
-                for (const key in technicalSpecs) {
-                    specsHtml += `<li><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${technicalSpecs[key]}</li>`;
-                }
-            } else {
-                specsHtml += '<li>No hay especificaciones adicionales.</li>';
-            }
-            specsHtml += '</ul>';
-            DOMElements.specs.innerHTML = specsHtml;
-
-            DOMElements.addToCartBtn.disabled = false;
-            DOMElements.qtyMinus.disabled = false;
-            DOMElements.qtyPlus.disabled = false;
-
-            showContent();
-        }
-
-        const getCart = () => JSON.parse(localStorage.getItem('cart') || '[]');
-        const saveCart = (cart) => localStorage.setItem('cart', JSON.stringify(cart));
-
-        function updateQuantity(delta) {
-            let newQty = (parseInt(DOMElements.qtyInput.value) || 1) + delta;
-            if (newQty < 1) newQty = 1;
-            DOMElements.qtyInput.value = newQty;
-        }
-
-        function addProductToCart() {
-            if (!currentProductData) return alert("Los datos del producto aún no han cargado.");
-            
-            const quantityToAdd = parseInt(DOMElements.qtyInput.value) || 1;
-            const cart = getCart();
-            const productInCart = cart.find(item => item.id === currentProductData.id);
-
-            if (productInCart) {
-                productInCart.cantidad += quantityToAdd;
-            } else {
-                cart.push({
-                    id: currentProductData.id,
-                    nombre: currentProductData.nombre,
-                    precio: currentProductData.precio,
-                    image: currentProductData.image,
-                    cantidad: quantityToAdd
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                const auth = getAuth(app);
+                signInAnonymously(auth).catch(e => console.error("Auth error:", e));
+                onAuthStateChanged(auth, user => {
+                    document.getElementById('auth-status').textContent = user ? 'Anónimo' : 'Ingresar';
                 });
+            } catch (e) {
+                console.error("Error inicializando Firebase:", e);
+                displayError("No se pudo conectar a la base de datos.");
+                return; // Detener si Firebase falla
             }
-            saveCart(cart);
-            alert(`"${currentProductData.nombre}" se ha añadido al carrito.`);
-        }
 
-        function initDetailPage() {
+            // --- 2. Lógica de la página de detalle ---
+            let currentProductData = null;
+            const DOMElements = {
+                loadingMessage: document.getElementById('loading-message'),
+                productContent: document.getElementById('product-content'),
+                pageTitle: document.getElementById('page-title'),
+                mainImage: document.getElementById('detail-main-image'),
+                name: document.getElementById('detail-name'),
+                brand: document.getElementById('detail-brand'),
+                price: document.getElementById('detail-price'),
+                description: document.getElementById('detail-description'),
+                specs: document.getElementById('detail-specs'),
+                qtyMinus: document.getElementById('qty-minus'),
+                qtyPlus: document.getElementById('qty-plus'),
+                qtyInput: document.getElementById('qty-input'),
+                addToCartBtn: document.getElementById('add-to-cart-btn')
+            };
+
+            function displayError(message) {
+                DOMElements.loadingMessage.textContent = `Error: ${message}`;
+                DOMElements.loadingMessage.classList.remove('hidden');
+                DOMElements.productContent.classList.add('hidden');
+            }
+
+            async function loadProductDetails() {
+                const productId = new URLSearchParams(window.location.search).get('id');
+                if (!productId) return displayError("ID de producto no encontrado en la URL.");
+                
+                try {
+                    const productDocRef = doc(db, `artifacts/${appId}/public/data/productos`, productId);
+                    const productSnap = await getDoc(productDocRef);
+
+                    if (productSnap.exists()) {
+                        currentProductData = { id: productSnap.id, ...productSnap.data() };
+                        renderProduct(currentProductData);
+                    } else {
+                        displayError(`El producto con ID "${productId}" no existe.`);
+                    }
+                } catch (error) {
+                    console.error("Error al cargar producto:", error);
+                    displayError("No se pudo cargar la información del producto.");
+                }
+            }
+
+            function renderProduct(product) {
+                const priceNumber = Number(product.precio) || 0;
+                const formattedPrice = priceNumber.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+
+                DOMElements.pageTitle.textContent = `${product.nombre} | MegaStore`;
+                DOMElements.mainImage.src = product.image || 'https://placehold.co/500x400/eeeeee/333333?text=Sin+Imagen';
+                DOMElements.mainImage.alt = product.nombre;
+                DOMElements.name.textContent = product.nombre;
+                DOMElements.brand.textContent = product.marca ? `Marca: ${product.marca}` : 'Marca no especificada';
+                DOMElements.price.textContent = formattedPrice;
+                DOMElements.description.textContent = product.descripcion || 'Este producto no tiene descripción.';
+                
+                let specsHtml = '<h4>Especificaciones</h4><ul>';
+                const technicalSpecs = product.especificaciones || {};
+                if (Object.keys(technicalSpecs).length > 0) {
+                    for (const key in technicalSpecs) {
+                        specsHtml += `<li><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${technicalSpecs[key]}</li>`;
+                    }
+                } else {
+                    specsHtml += '<li>No hay especificaciones adicionales.</li>';
+                }
+                specsHtml += '</ul>';
+                DOMElements.specs.innerHTML = specsHtml;
+
+                DOMElements.loadingMessage.classList.add('hidden');
+                DOMElements.productContent.classList.remove('hidden');
+                DOMElements.addToCartBtn.disabled = false;
+                DOMElements.qtyMinus.disabled = false;
+                DOMElements.qtyPlus.disabled = false;
+            }
+
+            // --- 3. Lógica del Carrito (LocalStorage) ---
+            const getCart = () => JSON.parse(localStorage.getItem('cart') || '[]');
+            const saveCart = (cart) => localStorage.setItem('cart', JSON.stringify(cart));
+
+            function updateQuantity(delta) {
+                let newQty = (parseInt(DOMElements.qtyInput.value) || 1) + delta;
+                if (newQty < 1) newQty = 1;
+                DOMElements.qtyInput.value = newQty;
+            }
+
+            function addProductToCart() {
+                if (!currentProductData) return alert("Los datos del producto aún no han cargado.");
+                
+                const quantityToAdd = parseInt(DOMElements.qtyInput.value) || 1;
+                const cart = getCart();
+                const productInCart = cart.find(item => item.id === currentProductData.id);
+
+                if (productInCart) {
+                    productInCart.cantidad += quantityToAdd;
+                } else {
+                    cart.push({ id: currentProductData.id, nombre: currentProductData.nombre, precio: currentProductData.precio, image: currentProductData.image, cantidad: quantityToAdd });
+                }
+                saveCart(cart);
+                alert(`"${currentProductData.nombre}" se ha añadido al carrito.`);
+            }
+
+            // --- 4. Arranque de la aplicación de la página ---
             DOMElements.addToCartBtn.disabled = true;
             DOMElements.qtyMinus.disabled = true;
             DOMElements.qtyPlus.disabled = true;
@@ -352,9 +216,10 @@
 
             loadProductDetails();
         }
+        
+        // **Punto de entrada**: Esperar a que el DOM esté listo.
+        document.addEventListener('DOMContentLoaded', initApp);
 
-        // --- Ejecutar todo ---
-        initDetailPage();
     </script>
 
 </body>
