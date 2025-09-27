@@ -2,14 +2,10 @@
 // Módulo: Lógica de Listado y Filtrado de Productos
 // ----------------------------------------------------
 
-// La función principal se define pero NO se llama inmediatamente.
-// Esperará el evento 'firebase-ready' para asegurar que window.db y window.auth estén disponibles.
 function initProductPage() {
-    // Estas variables ahora deben estar disponibles globalmente (expuestas en productos.html)
-    const { db, collection, query, where, onSnapshot, getDocs } = window;
+    const { db, collection, query, where, onSnapshot, doc, runTransaction } = window;
     if (!db) {
-        // En caso de fallo, mostramos un mensaje de error claro en el área de listado.
-        console.error("Error: Conexión con Firebase no iniciada. db object is null.");
+        console.error("Error: Conexión con Firebase no iniciada.");
         document.getElementById('listing-loading-message').textContent = "Error: Conexión con Firebase no iniciada.";
         return;
     }
@@ -21,33 +17,20 @@ function initProductPage() {
     let currentCategory = urlParams.get('cat') || 'all';
     let currentFilters = {};
     let currentSort = 'default';
+    let allProducts = []; // <-- 1. Variable para guardar los productos cargados
 
     const productGridEl = document.getElementById('product-listing-grid');
     const titleEl = document.getElementById('listing-title');
     const sortEl = document.getElementById('sort-by');
-    const specificFilterGroupEl = document.getElementById('specific-filter-group');
-    const specificFilterListEl = specificFilterGroupEl.querySelector('ul');
     const brandFilterListEl = document.getElementById('brand-filters');
     const loadingMessageEl = document.getElementById('listing-loading-message');
 
     // ----------------------------------------------------
-    // 1. RENDERING Y UTILIDADES
+    // RENDERIZADO Y CARRITO
     // ----------------------------------------------------
 
-    function getCategoryTitle(cat) {
-        const titles = {
-            'all': 'Todos los Productos',
-            'tecnologia': 'Categoría: Tecnología',
-            'indumentaria': 'Categoría: Indumentaria',
-            'hogar': 'Categoría: Hogar',
-            'otros': 'Otros Productos'
-        };
-        return titles[cat] || `Categoría: ${cat}`;
-    }
-
     function renderProductCard(product) {
-        // Usa una imagen placeholder si la URL no está definida
-        const imageUrl = product.imagenUrl || `https://placehold.co/300x300/4CAF50/ffffff?text=${product.nombre.substring(0, 10)}`;
+        const imageUrl = product.imagenUrl || `https://placehold.co/300x300/eee/333?text=${product.nombre.substring(0,10)}`;
         return `
             <div class="product-card">
                 <div class="product-image-container">
@@ -57,7 +40,7 @@ function initProductPage() {
                     <h3 title="${product.nombre}">${product.nombre}</h3>
                     <p class="brand">${product.marca || 'Marca Desconocida'}</p>
                     <p class="price">$${product.precio.toFixed(2)}</p>
-                    <button class="btn add-to-cart-btn">Añadir al Carrito</button>
+                    <button class="btn add-to-cart-btn" data-id="${product.id}">Añadir al Carrito</button> <!-- 2. ID añadido al botón -->
                 </div>
             </div>
         `;
@@ -66,214 +49,138 @@ function initProductPage() {
     function renderProducts(products) {
         productGridEl.innerHTML = '';
         if (products.length === 0) {
-            productGridEl.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 50px;">No se encontraron productos que coincidan con los filtros aplicados.</p>';
+            productGridEl.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 50px;">No se encontraron productos.</p>';
             loadingMessageEl.style.display = 'none';
             return;
         }
-
-        const html = products.map(renderProductCard).join('');
-        productGridEl.innerHTML = html;
+        productGridEl.innerHTML = products.map(renderProductCard).join('');
         loadingMessageEl.style.display = 'none';
     }
 
+    async function addToCart(productId, buttonEl) {
+        if (!window.auth || !window.auth.currentUser) {
+            alert("Por favor, inicia sesión para añadir productos a tu carrito.");
+            return;
+        }
+
+        const product = allProducts.find(p => p.id === productId);
+        if (!product) return;
+
+        const userId = window.auth.currentUser.uid;
+        const cartItemRef = doc(db, `artifacts/${APP_ID}/users/${userId}/carrito/items`, productId);
+
+        buttonEl.disabled = true;
+        buttonEl.textContent = "Añadiendo...";
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const cartDoc = await transaction.get(cartItemRef);
+                if (!cartDoc.exists()) {
+                    transaction.set(cartItemRef, { ...product, cantidad: 1 });
+                } else {
+                    const newQuantity = cartDoc.data().cantidad + 1;
+                    transaction.update(cartItemRef, { cantidad: newQuantity });
+                }
+            });
+
+            buttonEl.textContent = "¡Añadido!";
+            setTimeout(() => {
+                buttonEl.disabled = false;
+                buttonEl.textContent = "Añadir al Carrito";
+            }, 1500);
+
+        } catch (error) {
+            console.error("Error al añadir al carrito: ", error);
+            alert("No se pudo añadir el producto. Inténtalo de nuevo.");
+            buttonEl.disabled = false;
+            buttonEl.textContent = "Añadir al Carrito";
+        }
+    }
+
     // ----------------------------------------------------
-    // 2. FILTRADO Y CONSULTA DE FIRESTORE
+    // LÓGICA DE FIRESTORE
     // ----------------------------------------------------
 
     function buildQuery() {
         let q = collection(db, PRODUCTS_COLLECTION_PATH);
         const filters = [];
-
-        // 1. Filtrar por Categoría (Si no es 'all')
         if (currentCategory !== 'all') {
             filters.push(where('categoria', '==', currentCategory));
         }
-
-        // 2. Filtrar por Marca
-        const selectedBrands = currentFilters.marca || [];
-        if (selectedBrands.length > 0) {
-            filters.push(where('marca', 'in', selectedBrands));
+        if ((currentFilters.marca || []).length > 0) {
+            filters.push(where('marca', 'in', currentFilters.marca));
         }
-        
-        // *********
-        // NOTA IMPORTANTE: FIRESTORE LIMITA LOS FILTROS '!=' Y REQUIERE ÍNDICES COMPUESTOS
-        // Para evitar errores en este entorno, solo aplicaremos filtros '==' (categoría) y 'in' (marca).
-        // Los filtros de precio y ordenamiento se harán en memoria (en el paso handleSnapshot).
-        // *********
-
-        // Construir la consulta de Firestore
-        if (filters.length > 0) {
-            q = query(q, ...filters);
-        }
-
-        return q;
+        return filters.length > 0 ? query(q, ...filters) : q;
     }
 
-    // Función que maneja los datos obtenidos de Firestore y aplica filtros/orden en memoria
     function handleSnapshot(snapshot) {
-        // --- INICIO DE CÓDIGO DE DEPURACIÓN ---
-        console.log(`[DEPURACIÓN] Snapshot recibido para la categoría: '${currentCategory}'`);
-        console.log(`[DEPURACIÓN] Firestore devolvió ${snapshot.size} productos ANTES de cualquier filtro en memoria.`);
-
         let products = [];
         snapshot.forEach(doc => {
             products.push({ id: doc.id, ...doc.data() });
         });
+        
+        allProducts = products; // <-- 3. Guardar productos en la variable global
+        
+        // Aquí iría la lógica de filtrado en memoria y ordenamiento (si se necesita)
+        // ...
 
-        if (products.length > 0) {
-            console.log("[DEPURACIÓN] Datos del PRIMER producto recibido:", products[0]);
-        }
-        // --- FIN DE CÓDIGO DE DEPURACIÓN ---
-
-
-        // 1. Filtrado en Memoria (Precio)
-        const minPrice = parseFloat(document.getElementById('min-price').value) || 0;
-        const maxPriceEl = document.getElementById('max-price');
-        const maxPrice = parseFloat(maxPriceEl.value);
-
-        products = products.filter(p => {
-            const priceMatch = p.precio >= minPrice && (!maxPrice || p.precio <= maxPrice);
-            return priceMatch;
-        });
-
-        // 2. Ordenamiento en Memoria
-        products.sort((a, b) => {
-            switch (currentSort) {
-                case 'price_asc':
-                    return a.precio - b.precio;
-                case 'price_desc':
-                    return b.precio - a.precio;
-                case 'name_asc':
-                    return a.nombre.localeCompare(b.nombre);
-                case 'default':
-                default:
-                    return 0; // Sin cambios de orden inicial
-            }
-        });
-
-        // 3. Renderizar Filtros Dinámicos (Solo marcas por simplicidad)
-        updateDynamicFilters(products);
-
-        // 4. Renderizar Productos
         renderProducts(products);
+        updateDynamicFilters(products);
     }
 
     // ----------------------------------------------------
-    // 3. LÓGICA DE INTERFAZ Y EVENTOS
+    // LÓGICA DE INTERFAZ Y EVENTOS
     // ----------------------------------------------------
 
     function updateDynamicFilters(products) {
         const brands = [...new Set(products.map(p => p.marca).filter(Boolean))].sort();
         brandFilterListEl.innerHTML = brands.map(brand => `
-            <li>
-                <label>
-                    <input type="checkbox" name="marca" value="${brand}" 
-                           ${(currentFilters.marca || []).includes(brand) ? 'checked' : ''}>
-                    ${brand}
-                </label>
-            </li>
+            <li><label><input type="checkbox" name="marca" value="${brand}" ${(currentFilters.marca || []).includes(brand) ? 'checked' : ''}> ${brand}</label></li>
         `).join('');
-        
-        // Ocultar/Mostrar filtros específicos si es necesario (ejemplo con 'capacidad' y 'talla')
-        const specificKey = currentCategory === 'tecnologia' ? 'capacidad' : (currentCategory === 'indumentaria' ? 'talla' : null);
-
-        if (specificKey) {
-            specificFilterGroupEl.style.display = 'block';
-            specificFilterGroupEl.querySelector('h4').innerHTML = `<i class="fas fa-list-alt"></i> ${specificKey.charAt(0).toUpperCase() + specificKey.slice(1)}`;
-
-            const specificValues = [...new Set(products.map(p => p[specificKey]).filter(Boolean))].sort();
-            specificFilterListEl.innerHTML = specificValues.map(value => `
-                <li>
-                    <label>
-                        <input type="checkbox" name="${specificKey}" value="${value}">
-                        ${value}
-                    </label>
-                </li>
-            `).join('');
-
-        } else {
-            specificFilterGroupEl.style.display = 'none';
-        }
     }
 
     function setupEventListeners() {
-        // Evento de Ordenamiento
         sortEl.addEventListener('change', () => {
             currentSort = sortEl.value;
-            // Al cambiar el orden, volvemos a obtener datos (o re-procesamos el snapshot)
             startListening();
         });
-        
-        // Evento de Filtro de Marcas
+
         brandFilterListEl.addEventListener('change', (e) => {
-            if (e.target.type === 'checkbox' && e.target.name === 'marca') {
-                const selected = Array.from(brandFilterListEl.querySelectorAll('input:checked'))
-                                    .map(input => input.value);
+            if (e.target.name === 'marca') {
+                const selected = Array.from(brandFilterListEl.querySelectorAll('input:checked')).map(i => i.value);
                 currentFilters.marca = selected;
                 startListening();
             }
         });
 
-        // Evento de Aplicar Precio
-        document.getElementById('apply-price-filter').addEventListener('click', () => {
-            startListening();
-        });
-
-        // Evento de Limpiar Filtros
-        document.querySelectorAll('.btn-clear-filter').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const filterType = e.target.getAttribute('data-filter-type');
-                if (filterType === 'marca') {
-                    currentFilters.marca = [];
-                    brandFilterListEl.querySelectorAll('input').forEach(input => input.checked = false);
-                }
-                // Limpiar otros filtros si existieran
-                startListening();
-            });
+        // <-- 4. Escuchador de eventos para los botones de añadir
+        productGridEl.addEventListener('click', (e) => {
+            if (e.target.classList.contains('add-to-cart-btn')) {
+                const productId = e.target.getAttribute('data-id');
+                addToCart(productId, e.target);
+            }
         });
     }
 
     // ----------------------------------------------------
-    // 4. INICIO DE LA LÓGICA DE FIRESTORE
+    // INICIO
     // ----------------------------------------------------
 
     let unsubscribe = null;
-
     function startListening() {
-        // Detener la escucha anterior si existe
-        if (unsubscribe) {
-            unsubscribe();
-        }
-
-        // Actualizar UI de título
-        titleEl.textContent = getCategoryTitle(currentCategory);
+        if (unsubscribe) unsubscribe();
+        titleEl.textContent = currentCategory === 'all' ? 'Todos los Productos' : `Categoría: ${currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)}`;
         loadingMessageEl.style.display = 'block';
-        loadingMessageEl.textContent = "Cargando productos...";
-        productGridEl.innerHTML = ''; // Limpiar grid
-
-        // Crear la consulta de Firestore
+        productGridEl.innerHTML = '';
         const q = buildQuery();
-
-        // Iniciar nueva escucha en tiempo real
         unsubscribe = onSnapshot(q, handleSnapshot, (error) => {
-            console.error("Error al escuchar los productos:", error);
-            loadingMessageEl.textContent = "Error: Conexión con Firebase no iniciada.";
+            console.error("Error al escuchar productos:", error);
+            loadingMessageEl.textContent = "Error al cargar productos.";
         });
     }
 
-    // ----------------------------------------------------
-    // INICIALIZACIÓN
-    // ----------------------------------------------------
-
-    // Determinar la categoría inicial desde la URL
-    currentCategory = urlParams.get('cat') || 'all';
-    
-    // Iniciar la escucha y configurar los eventos
     setupEventListeners();
     startListening();
 }
 
-
-// AÑADIMOS ESTO: Esperar a que el script de inicialización de Firebase dispare el evento
 document.addEventListener('firebase-ready', initProductPage);
-console.log("Script js/productos.js cargado. Esperando evento 'firebase-ready'...");
