@@ -1,5 +1,5 @@
-// js/detalle.js (Versión Final y Robusta)
-// Espera la señal "firebase-ready" antes de ejecutarse.
+// js/detalle.js (Versión Definitiva)
+// Espera la señal "firebase-ready" y busca las variables en el scope global `window`.
 
 // ----------------------------------------------------
 // 1. DEFINICIÓN DE FUNCIONES PRINCIPALES
@@ -19,7 +19,7 @@ function displayError(message) {
     if (productContent) {
         productContent.classList.add('hidden');
     }
-    console.error(message); // También loguea en consola para debug
+    console.error(message);
 }
 
 // Función para cargar los detalles del producto desde Firestore
@@ -33,7 +33,11 @@ async function loadProductDetails() {
         return displayError("La conexión con la base de datos (Firebase) no está disponible.");
     }
     
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    // CORRECCIÓN: Buscar la variable `__app_id` en el objeto `window` global.
+    const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+    if (appId === 'default-app-id') {
+        console.warn("No se encontró `__app_id` en `window`. Usando valor por defecto.");
+    }
 
     try {
         const productDocRef = window.doc(window.db, `artifacts/${appId}/public/data/productos`, productId);
@@ -61,9 +65,6 @@ function renderProduct(product) {
     document.getElementById('detail-price').textContent = (Number(product.precio) || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
     document.getElementById('detail-description').textContent = product.descripcion || 'Este producto no tiene descripción.';
     
-    // Lógica para las especificaciones (si aplica)
-    // ... (puedes añadirla si es necesario)
-
     document.getElementById('loading-message').classList.add('hidden');
     document.getElementById('product-content').classList.remove('hidden');
     document.getElementById('add-to-cart-btn').disabled = false;
@@ -86,14 +87,21 @@ function setupActionButtons() {
                 return;
             }
             const quantity = parseInt(qtyInput.value) || 1;
-            // Aquí iría la lógica para añadir al carrito (usando LocalStorage, por ejemplo)
+            // Lógica para añadir al carrito
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingProductIndex = cart.findIndex(item => item.id === currentProductData.id);
+            if (existingProductIndex > -1) {
+                cart[existingProductIndex].cantidad += quantity;
+            } else {
+                cart.push({ ...currentProductData, cantidad: quantity });
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
             alert(`Añadido al carrito: ${quantity} x ${currentProductData.nombre}`);
         });
     }
     
     if (qtyPlus) qtyPlus.addEventListener('click', () => { 
-        let current = parseInt(qtyInput.value);
-        qtyInput.value = current + 1;
+        qtyInput.value = parseInt(qtyInput.value) + 1;
     });
     
     if (qtyMinus) qtyMinus.addEventListener('click', () => { 

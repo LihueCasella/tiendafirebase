@@ -79,25 +79,27 @@
         <div class="footer-content"><p>&copy; 2025 MegaStore. Todos los derechos reservados.</p><nav class="footer-links"><a href="#">Términos</a> | <a href="#">Privacidad</a> | <a href="#">Contacto</a></nav></div>
     </footer>
 
-    <!-- SCRIPT DE INICIALIZACIÓN DE FIREBASE (ROBUSTO) -->
+    <!-- SCRIPT DE INICIALIZACIÓN DE FIREBASE (CORREGIDO Y ROBUSTO) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         function initializeFirebase() {
-            if (typeof __firebase_config === 'undefined') {
-                console.warn("Configuración de Firebase no encontrada, reintentando en 100ms...");
+            // CORRECCIÓN: Buscar la configuración en el objeto `window` global.
+            if (typeof window.__firebase_config === 'undefined') {
+                console.warn("Configuración de Firebase no encontrada en `window`, reintentando en 100ms...");
                 setTimeout(initializeFirebase, 100);
                 return;
             }
 
             try {
-                const firebaseConfig = JSON.parse(__firebase_config);
+                const firebaseConfig = JSON.parse(window.__firebase_config);
                 const app = initializeApp(firebaseConfig);
                 const db = getFirestore(app);
                 const auth = getAuth(app);
 
+                // Exponer las dependencias necesarias en el objeto `window`
                 window.db = db;
                 window.doc = doc;
                 window.getDoc = getDoc;
@@ -124,7 +126,6 @@
         initializeFirebase();
     </script>
     
-    <!-- SCRIPT DE LA PÁGINA (ESCUCHA LA SEÑAL) - CORREGIDO -->
     <script src="js/detalle.js"></script>
 
 </body>
