@@ -38,15 +38,18 @@ function renderProducts(productsToRender) {
     productGrid.innerHTML = ''; // Limpia la grilla antes de renderizar
 
     productsToRender.forEach(product => {
+        // ENVOLVEMOS LA TARJETA EN UN ENLACE '<a>' a la página de detalle.
         const cardHTML = `
-            <article class="product-card" data-id="${product.id}" data-category="${product.category}">
-                <img src="${product.image}" alt="${product.name}" onerror="this.src='placeholder.jpg';">
-                <div class="product-info">
-                    <p class="product-name">${product.name}</p>
-                    <p class="product-price">$${product.price.toLocaleString('es-AR')}</p>
-                    <button class="btn btn-small add-to-cart" data-id="${product.id}">Añadir al Carrito</button>
-                </div>
-            </article>
+            <a href="detalle.html?id=${product.id}" class="product-card-link">
+                <article class="product-card" data-id="${product.id}" data-category="${product.category}">
+                    <img src="${product.image}" alt="${product.name}" onerror="this.src='placeholder.jpg';">
+                    <div class="product-info">
+                        <p class="product-name">${product.name}</p>
+                        <p class="product-price">$${product.price.toLocaleString('es-AR')}</p>
+                        <button class="btn btn-small add-to-cart" data-id="${product.id}">Añadir al Carrito</button>
+                    </div>
+                </article>
+            </a>
         `;
         productGrid.innerHTML += cardHTML;
     });
@@ -54,6 +57,10 @@ function renderProducts(productsToRender) {
     // Añade el Event Listener a los nuevos botones de carrito
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', (e) => {
+            // PREVENIMOS que el click en el botón active el enlace de la tarjeta.
+            e.preventDefault();
+            e.stopPropagation();
+
             const productId = parseInt(e.target.dataset.id);
             addToCart(productId);
         });
