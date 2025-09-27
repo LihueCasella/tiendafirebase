@@ -22,7 +22,7 @@ document.addEventListener('firebase-ready', async () => {
             precio: 599.99,
             capacidad: "128GB",
             descripcion: "El último modelo con cámara de 108MP.",
-            imagenUrl: "https://placehold.co/300x300/1e40af/ffffff?text=Smartphone"
+            image: "https://placehold.co/300x300/1e40af/ffffff?text=Smartphone"
         },
         {
             nombre: "Auriculares Bluetooth P3",
@@ -31,7 +31,7 @@ document.addEventListener('firebase-ready', async () => {
             precio: 79.50,
             capacidad: "24h Batería",
             descripcion: "Cancelación de ruido activa.",
-            imagenUrl: "https://placehold.co/300x300/10b981/ffffff?text=Auriculares"
+            image: "https://placehold.co/300x300/10b981/ffffff?text=Auriculares"
         },
         {
             nombre: "Monitor Curvo 27' Pro",
@@ -40,7 +40,7 @@ document.addEventListener('firebase-ready', async () => {
             precio: 349.00,
             capacidad: "4K",
             descripcion: "Diseñado para gaming y trabajo.",
-            imagenUrl: "https://placehold.co/300x300/f59e0b/ffffff?text=Monitor"
+            image: "https://placehold.co/300x300/f59e0b/ffffff?text=Monitor"
         },
 
         // Productos de Indumentaria
@@ -51,7 +51,7 @@ document.addEventListener('firebase-ready', async () => {
             precio: 45.99,
             talla: "L",
             descripcion: "Algodón orgánico, color azul oscuro.",
-            imagenUrl: "https://placehold.co/300x300/ef4444/ffffff?text=Jeans"
+            image: "https://placehold.co/300x300/ef4444/ffffff?text=Jeans"
         },
         {
             nombre: "Chaqueta de Invierno Alpina",
@@ -60,7 +60,7 @@ document.addEventListener('firebase-ready', async () => {
             precio: 129.99,
             talla: "XL",
             descripcion: "Impermeable y térmica para bajas temperaturas.",
-            imagenUrl: "https://placehold.co/300x300/a855f7/ffffff?text=Chaqueta"
+            image: "https://placehold.co/300x300/a855f7/ffffff?text=Chaqueta"
         },
         {
             nombre: "Camiseta Deportiva DRI-FIT",
@@ -69,7 +69,7 @@ document.addEventListener('firebase-ready', async () => {
             precio: 25.00,
             talla: "M",
             descripcion: "Tela transpirable y ligera.",
-            imagenUrl: "https://placehold.co/300x300/06b6d4/ffffff?text=Camiseta"
+            image: "https://placehold.co/300x300/06b6d4/ffffff?text=Camiseta"
         },
 
         // Productos para el Hogar
@@ -80,7 +80,7 @@ document.addEventListener('firebase-ready', async () => {
             precio: 199.90,
             material: "Acero Inoxidable",
             descripcion: "Prepara café con solo tocar un botón.",
-            imagenUrl: "https://placehold.co/300x300/fbbf24/333?text=Cafetera"
+            image: "https://placehold.co/300x300/fbbf24/333?text=Cafetera"
         },
         {
             nombre: "Juego de Sábanas de Lino",
@@ -89,7 +89,7 @@ document.addEventListener('firebase-ready', async () => {
             precio: 85.00,
             material: "Lino",
             descripcion: "Máximo confort para el descanso.",
-            imagenUrl: "https://placehold.co/300x300/16a34a/ffffff?text=Sabanas"
+            image: "https://placehold.co/300x300/16a34a/ffffff?text=Sabanas"
         },
         {
             nombre: "Aspiradora Robótica Smart",
@@ -98,7 +98,7 @@ document.addEventListener('firebase-ready', async () => {
             precio: 250.50,
             material: "Plástico ABS",
             descripcion: "Mapeo inteligente y control por app.",
-            imagenUrl: "https://placehold.co/300x300/4f46e5/ffffff?text=Aspiradora"
+            image: "https://placehold.co/300x300/4f46e5/ffffff?text=Aspiradora"
         },
         
         // Producto de categoría 'all' para probar el listado general
@@ -109,7 +109,7 @@ document.addEventListener('firebase-ready', async () => {
             precio: 40.00,
             material: "Aluminio",
             descripcion: "Luz ajustable con 3 modos de color.",
-            imagenUrl: "https://placehold.co/300x300/f97316/ffffff?text=Lampara"
+            image: "https://placehold.co/300x300/f97316/ffffff?text=Lampara"
         }
     ];
 

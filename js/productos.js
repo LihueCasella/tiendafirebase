@@ -26,12 +26,11 @@ function initProductPage() {
     const loadingMessageEl = document.getElementById('listing-loading-message');
 
     // ----------------------------------------------------
-    // RENDERIZADO Y CARRITO
+    // RENDERIZADO
     // ----------------------------------------------------
 
     function renderProductCard(product) {
         const imageUrl = product.imagenUrl || `https://placehold.co/300x300/eee/333?text=${product.nombre.substring(0,10)}`;
-        // Envolvemos toda la tarjeta en un enlace
         return `
             <a href="detalle.html?id=${product.id}" class="product-card-link">
                 <div class="product-card">
@@ -54,51 +53,53 @@ function initProductPage() {
         productGridEl.innerHTML = '';
         if (products.length === 0) {
             productGridEl.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 50px;">No se encontraron productos.</p>';
-            loadingMessageEl.style.display = 'none';
+            if (loadingMessageEl) loadingMessageEl.style.display = 'none';
             return;
         }
         productGridEl.innerHTML = products.map(renderProductCard).join('');
-        loadingMessageEl.style.display = 'none';
+        if (loadingMessageEl) loadingMessageEl.style.display = 'none';
     }
 
-    async function addToCart(productId, buttonEl) {
-        if (!window.auth || !window.auth.currentUser) {
-            alert("Por favor, inicia sesión para añadir productos a tu carrito.");
+    // ----------------------------------------------------
+    // LÓGICA DE CARRITO (LOCALSTORAGE)
+    // ----------------------------------------------------
+
+    const getCart = () => {
+        const cart = localStorage.getItem('cart');
+        return cart ? JSON.parse(cart) : [];
+    }
+
+    const saveCart = (cart) => {
+        localStorage.setItem('cart', JSON.stringify(cart));
+        // Aquí podríamos actualizar un contador de carrito en la UI si existiera
+    }
+
+    function addToCart(productId, buttonEl) {
+        const product = allProducts.find(p => p.id === productId);
+        if (!product) {
+            console.error("Producto no encontrado para añadir al carrito:", productId);
             return;
         }
 
-        const product = allProducts.find(p => p.id === productId);
-        if (!product) return;
+        const cart = getCart();
+        const productInCart = cart.find(item => item.id === productId);
 
-        const userId = window.auth.currentUser.uid;
-        const cartItemRef = doc(db, `artifacts/${APP_ID}/users/${userId}/carrito/items`, productId);
+        if (productInCart) {
+            productInCart.cantidad = (productInCart.cantidad || 1) + 1;
+        } else {
+            cart.push({ ...product, cantidad: 1 });
+        }
 
+        saveCart(cart);
+
+        // Feedback Visual
+        alert(`'${product.nombre}' fue añadido al carrito.`);
         buttonEl.disabled = true;
-        buttonEl.textContent = "Añadiendo...";
-
-        try {
-            await runTransaction(db, async (transaction) => {
-                const cartDoc = await transaction.get(cartItemRef);
-                if (!cartDoc.exists()) {
-                    transaction.set(cartItemRef, { ...product, cantidad: 1 });
-                } else {
-                    const newQuantity = cartDoc.data().cantidad + 1;
-                    transaction.update(cartItemRef, { cantidad: newQuantity });
-                }
-            });
-
-            buttonEl.textContent = "¡Añadido!";
-            setTimeout(() => {
-                buttonEl.disabled = false;
-                buttonEl.textContent = "Añadir al Carrito";
-            }, 1500);
-
-        } catch (error) {
-            console.error("Error al añadir al carrito: ", error);
-            alert("No se pudo añadir el producto. Inténtalo de nuevo.");
+        buttonEl.textContent = "¡Añadido!";
+        setTimeout(() => {
             buttonEl.disabled = false;
             buttonEl.textContent = "Añadir al Carrito";
-        }
+        }, 1500);
     }
 
     // ----------------------------------------------------
@@ -161,9 +162,7 @@ function initProductPage() {
 
         if (productGridEl) {
             productGridEl.addEventListener('click', (e) => {
-                // Si el clic fue en un botón de carrito
                 if (e.target.classList.contains('add-to-cart-btn')) {
-                    // Prevenimos que el enlace de la tarjeta se active
                     e.preventDefault();
                     const productId = e.target.getAttribute('data-id');
                     addToCart(productId, e.target);
