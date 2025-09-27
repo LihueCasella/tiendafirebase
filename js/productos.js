@@ -111,10 +111,20 @@ function initProductPage() {
 
     // Función que maneja los datos obtenidos de Firestore y aplica filtros/orden en memoria
     function handleSnapshot(snapshot) {
+        // --- INICIO DE CÓDIGO DE DEPURACIÓN ---
+        console.log(`[DEPURACIÓN] Snapshot recibido para la categoría: '${currentCategory}'`);
+        console.log(`[DEPURACIÓN] Firestore devolvió ${snapshot.size} productos ANTES de cualquier filtro en memoria.`);
+
         let products = [];
         snapshot.forEach(doc => {
             products.push({ id: doc.id, ...doc.data() });
         });
+
+        if (products.length > 0) {
+            console.log("[DEPURACIÓN] Datos del PRIMER producto recibido:", products[0]);
+        }
+        // --- FIN DE CÓDIGO DE DEPURACIÓN ---
+
 
         // 1. Filtrado en Memoria (Precio)
         const minPrice = parseFloat(document.getElementById('min-price').value) || 0;
