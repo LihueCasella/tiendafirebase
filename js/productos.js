@@ -1,361 +1,269 @@
-// js/productos.js
-// Lógica principal para la página de listado de productos y manejo del carrito.
-
 // ----------------------------------------------------
-// 1. VARIABLES GLOBALES DE ESTADO Y DOM
+// Módulo: Lógica de Listado y Filtrado de Productos
 // ----------------------------------------------------
 
-// Estado actual de los filtros
-const currentFilters = {
-    category: '',
-    minPrice: 0,
-    maxPrice: Infinity,
-    brands: [],
-    sortBy: 'default' // 'price_asc', 'price_desc', 'name_asc'
-};
-
-const DOMElements = {
-    listingGrid: document.getElementById('product-listing-grid'),
-    listingTitle: document.getElementById('listing-title'),
-    categoryTitle: document.getElementById('current-category-title'),
-    minPriceInput: document.getElementById('min-price'),
-    maxPriceInput: document.getElementById('max-price'),
-    applyPriceBtn: document.getElementById('apply-price-filter'),
-    brandFilters: document.getElementById('brand-filters'),
-    sortBySelect: document.getElementById('sort-by'),
-    specificFiltersGroup: document.getElementById('specific-filter-group')
-};
-
-// ----------------------------------------------------
-// 2. UTILIDADES Y LÓGICA DEL CARRITO
-// ----------------------------------------------------
-
-/**
- * Lee la URL para obtener el parámetro 'cat' (categoría).
- * @returns {string} La categoría actual (ej: 'tecnologia').
- */
-function getCategoryFromURL() {
-    const urlParams = new URLSearchParams(window.location.search);
-    // Devuelve 'tecnologia' por defecto si no se especifica.
-    return urlParams.get('cat') || 'tecnologia';
-}
-
-/**
- * Agrega un producto al carrito del usuario en Firestore.
- * Utiliza la colección privada del usuario: /artifacts/{appId}/users/{userId}/carrito
- * @param {string} productId - ID del producto a agregar.
- */
-async function addToCart(productId) {
-    // ⚠️ COMPROBACIÓN: Asegurar que Firebase esté listo y el usuario autenticado
-    if (!window.db || !window.auth.currentUser) {
-        console.error("Firebase DB o autenticación no disponible.");
-        alert("Necesitas estar conectado para añadir productos al carrito."); // Usar un modal en producción
+// La función principal se define pero NO se llama inmediatamente.
+// Esperará el evento 'firebase-ready' para asegurar que window.db y window.auth estén disponibles.
+function initProductPage() {
+    // Estas variables ahora deben estar disponibles globalmente (expuestas en productos.html)
+    const { db, collection, query, where, onSnapshot, getDocs } = window;
+    if (!db) {
+        // En caso de fallo, mostramos un mensaje de error claro en el área de listado.
+        console.error("Error: Conexión con Firebase no iniciada. db object is null.");
+        document.getElementById('listing-loading-message').textContent = "Error: Conexión con Firebase no iniciada.";
         return;
     }
 
-    const userId = window.auth.currentUser.uid;
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    
-    // Ruta del documento del carrito para el usuario actual
-    const cartDocRef = window.doc(window.db, `artifacts/${appId}/users/${userId}/carrito/items`);
+    const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const PRODUCTS_COLLECTION_PATH = `/artifacts/${APP_ID}/public/data/productos`;
 
-    try {
-        // En un carrito real, buscamos el producto. 
-        // Para simplificar, asumimos que el documento del carrito contiene un mapa de productos.
-        
-        // 1. Obtener el producto actual de Firestore (solo para obtener su precio/nombre)
-        // Nota: En una aplicación real, se usaría un mapa para evitar lecturas extra.
-        // Aquí hacemos una consulta para simular la obtención de datos del producto.
-        const productRef = window.doc(window.db, `artifacts/${appId}/public/data/productos`, productId);
-        const productSnap = await window.getDoc(productRef); // Usamos getDoc sincrónico
-        
-        if (!productSnap.exists()) {
-            console.error(`Producto con ID ${productId} no encontrado.`);
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentCategory = urlParams.get('cat') || 'all';
+    let currentFilters = {};
+    let currentSort = 'default';
+
+    const productGridEl = document.getElementById('product-listing-grid');
+    const titleEl = document.getElementById('listing-title');
+    const sortEl = document.getElementById('sort-by');
+    const specificFilterGroupEl = document.getElementById('specific-filter-group');
+    const specificFilterListEl = specificFilterGroupEl.querySelector('ul');
+    const brandFilterListEl = document.getElementById('brand-filters');
+    const loadingMessageEl = document.getElementById('listing-loading-message');
+
+    // ----------------------------------------------------
+    // 1. RENDERING Y UTILIDADES
+    // ----------------------------------------------------
+
+    function getCategoryTitle(cat) {
+        const titles = {
+            'all': 'Todos los Productos',
+            'tecnologia': 'Categoría: Tecnología',
+            'indumentaria': 'Categoría: Indumentaria',
+            'hogar': 'Categoría: Hogar',
+            'otros': 'Otros Productos'
+        };
+        return titles[cat] || `Categoría: ${cat}`;
+    }
+
+    function renderProductCard(product) {
+        // Usa una imagen placeholder si la URL no está definida
+        const imageUrl = product.imagenUrl || `https://placehold.co/300x300/4CAF50/ffffff?text=${product.nombre.substring(0, 10)}`;
+        return `
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="${imageUrl}" alt="${product.nombre}" onerror="this.onerror=null; this.src='https://placehold.co/300x300/888/ffffff?text=No+Image';">
+                </div>
+                <div class="product-details">
+                    <h3 title="${product.nombre}">${product.nombre}</h3>
+                    <p class="brand">${product.marca || 'Marca Desconocida'}</p>
+                    <p class="price">$${product.precio.toFixed(2)}</p>
+                    <button class="btn add-to-cart-btn">Añadir al Carrito</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderProducts(products) {
+        productGridEl.innerHTML = '';
+        if (products.length === 0) {
+            productGridEl.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 50px;">No se encontraron productos que coincidan con los filtros aplicados.</p>';
+            loadingMessageEl.style.display = 'none';
             return;
         }
 
-        const productData = productSnap.data();
-        
-        // 2. Actualizar el carrito (usando setDoc con merge: true para actualizar sin borrar)
-        await window.setDoc(cartDocRef, {
-            [productId]: { // Usamos el ID del producto como clave del mapa
-                id: productId,
-                name: productData.name,
-                price: productData.price,
-                // Simulamos que siempre se añade 1 unidad. En el futuro, se actualizaría la cantidad.
-                quantity: window.increment(1), 
-                addedAt: window.serverTimestamp() // Para saber cuándo se añadió
-            }
-        }, { merge: true }); // Merge: si el producto ya existe, se actualiza la cantidad
-
-        console.log(`Producto ${productData.name} añadido/actualizado en el carrito de ${userId}`);
-        
-        // Mostrar un mensaje de éxito al usuario (usar un modal, no alert)
-        alert(`¡"${productData.name}" añadido al carrito!`); 
-
-    } catch (error) {
-        console.error("Error al añadir producto al carrito:", error);
-        alert("Ocurrió un error al intentar añadir el producto.");
+        const html = products.map(renderProductCard).join('');
+        productGridEl.innerHTML = html;
+        loadingMessageEl.style.display = 'none';
     }
-}
 
+    // ----------------------------------------------------
+    // 2. FILTRADO Y CONSULTA DE FIRESTORE
+    // ----------------------------------------------------
 
-/**
- * Inicializa los listeners para los botones "Añadir al Carrito" después de renderizar.
- */
-function setupCartEventListeners() {
-    // Escucha eventos de clic en la grilla para los botones 'add-to-cart'
-    DOMElements.listingGrid.addEventListener('click', (e) => {
-        const button = e.target.closest('.add-to-cart');
-        if (button) {
-            const productId = button.dataset.id;
-            addToCart(productId);
+    function buildQuery() {
+        let q = collection(db, PRODUCTS_COLLECTION_PATH);
+        const filters = [];
+
+        // 1. Filtrar por Categoría (Si no es 'all')
+        if (currentCategory !== 'all') {
+            filters.push(where('categoria', '==', currentCategory));
         }
-    });
-}
 
+        // 2. Filtrar por Marca
+        const selectedBrands = currentFilters.marca || [];
+        if (selectedBrands.length > 0) {
+            filters.push(where('marca', 'in', selectedBrands));
+        }
+        
+        // *********
+        // NOTA IMPORTANTE: FIRESTORE LIMITA LOS FILTROS '!=' Y REQUIERE ÍNDICES COMPUESTOS
+        // Para evitar errores en este entorno, solo aplicaremos filtros '==' (categoría) y 'in' (marca).
+        // Los filtros de precio y ordenamiento se harán en memoria (en el paso handleSnapshot).
+        // *********
 
-/**
- * Renderiza los productos en la grilla.
- * @param {Array} productsToRender - Lista de productos ya filtrados.
- */
-function renderProducts(productsToRender) {
-    if (!DOMElements.listingGrid) return;
+        // Construir la consulta de Firestore
+        if (filters.length > 0) {
+            q = query(q, ...filters);
+        }
 
-    DOMElements.listingGrid.innerHTML = ''; // Limpiar grilla
-
-    if (productsToRender.length === 0) {
-        DOMElements.listingGrid.innerHTML = '<p class="w-full text-center py-10 text-gray-500">No se encontraron productos con los filtros seleccionados.</p>';
-        return;
+        return q;
     }
 
-    productsToRender.forEach(product => {
-        const priceNumber = Number(product.price) || 0;
-        const formattedPrice = priceNumber.toLocaleString('es-AR');
-
-        const cardHTML = `
-            <article class="product-card" data-id="${product.id}" data-category="${product.category}">
-                <img src="${product.image || 'https://placehold.co/250x200/cccccc/333333?text=Sin+Imagen'}" alt="${product.name}" onerror="this.src='https://placehold.co/250x200/cccccc/333333?text=Error';">
-                <div class="product-info">
-                    <p class="product-name">${product.name}</p>
-                    <p class="product-price">$${formattedPrice}</p>
-                    <button class="btn btn-small add-to-cart" data-id="${product.id}">Añadir al Carrito</button>
-                </div>
-            </article>
-        `;
-        DOMElements.listingGrid.innerHTML += cardHTML;
-    });
-
-    // Actualizar el título de la página
-    const categoryName = currentFilters.category.charAt(0).toUpperCase() + currentFilters.category.slice(1);
-    DOMElements.listingTitle.textContent = `Listado de Productos: ${categoryName}`;
-    DOMElements.categoryTitle.textContent = `Categoría: ${categoryName}`;
-
-    // NO necesitamos llamar a setupCartEventListeners aquí, ya que el listener está en la grilla (delegación de eventos)
-}
-
-/**
- * Filtra y ordena un array de productos en el lado del cliente.
- * Se usa para filtros que Firebase no maneja bien (ej: OR en múltiples marcas, o filtros de texto).
- * @param {Array} products - Lista de todos los productos de la categoría.
- * @returns {Array} Los productos filtrados y ordenados.
- */
-function filterAndSortProducts(products) {
-    let filtered = products;
-    const filters = currentFilters;
-
-    // 1. Filtrar por marcas
-    if (filters.brands.length > 0) {
-        filtered = filtered.filter(p => filters.brands.includes(p.brand));
-    }
-
-    // 2. (Aquí iría la lógica de filtros específicos: talla, capacidad, etc.)
-
-    // 3. Ordenar
-    if (filters.sortBy !== 'default') {
-        filtered.sort((a, b) => {
-            const priceA = Number(a.price) || 0;
-            const priceB = Number(b.price) || 0;
-
-            if (filters.sortBy === 'price_asc') {
-                return priceA - priceB;
-            } else if (filters.sortBy === 'price_desc') {
-                return priceB - priceA;
-            } else if (filters.sortBy === 'name_asc') {
-                return a.name.localeCompare(b.name);
-            }
-            return 0;
-        });
-    }
-
-    return filtered;
-}
-
-// ----------------------------------------------------
-// 3. CONSULTA A FIRESTORE Y MANEJO DE QUERIES
-// ----------------------------------------------------
-
-/**
- * Consulta la base de datos de Firebase con los filtros actuales y usa onSnapshot.
- */
-function loadProducts() {
-    // ⚠️ COMPROBACIÓN CRÍTICA: Asegurar que Firebase esté listo
-    if (!window.db || !window.collection || !window.onSnapshot || !window.where) {
-        DOMElements.listingGrid.innerHTML = '<p class="w-full text-center py-10 text-red-500">Error: Conexión con Firebase no iniciada.</p>';
-        return;
-    }
-
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const productsCollectionRef = window.collection(window.db, `artifacts/${appId}/public/data/productos`);
-    
-    // Construir la Query de Firebase
-    let productQuery = window.query(
-        productsCollectionRef,
-        window.where('category', '==', currentFilters.category) // Filtro obligatorio por categoría
-    );
-    
-    // El filtro de rango de precio se hace en el cliente para evitar problemas de índice.
-
-    // Listener de Tiempo Real
-    window.onSnapshot(productQuery, (snapshot) => {
-        const allProducts = [];
+    // Función que maneja los datos obtenidos de Firestore y aplica filtros/orden en memoria
+    function handleSnapshot(snapshot) {
+        let products = [];
         snapshot.forEach(doc => {
-            // Incluir el ID para futuras operaciones
-            allProducts.push({ id: doc.id, ...doc.data() }); 
+            products.push({ id: doc.id, ...doc.data() });
         });
 
-        // Aplicar filtros adicionales (precio, marca, ordenación) en el cliente
-        const finalProducts = allProducts
-            .filter(p => (p.price || 0) >= currentFilters.minPrice)
-            .filter(p => (p.price || 0) <= currentFilters.maxPrice);
+        // 1. Filtrado en Memoria (Precio)
+        const minPrice = parseFloat(document.getElementById('min-price').value) || 0;
+        const maxPriceEl = document.getElementById('max-price');
+        const maxPrice = parseFloat(maxPriceEl.value);
 
-        const filteredAndSorted = filterAndSortProducts(finalProducts);
+        products = products.filter(p => {
+            const priceMatch = p.precio >= minPrice && (!maxPrice || p.precio <= maxPrice);
+            return priceMatch;
+        });
 
-        renderProducts(filteredAndSorted);
+        // 2. Ordenamiento en Memoria
+        products.sort((a, b) => {
+            switch (currentSort) {
+                case 'price_asc':
+                    return a.precio - b.precio;
+                case 'price_desc':
+                    return b.precio - a.precio;
+                case 'name_asc':
+                    return a.nombre.localeCompare(b.nombre);
+                case 'default':
+                default:
+                    return 0; // Sin cambios de orden inicial
+            }
+        });
 
-    }, (error) => {
-        console.error("Error al escuchar productos:", error);
-        DOMElements.listingGrid.innerHTML = '<p class="w-full text-center py-10 text-red-500">Error: No se pudo cargar la base de datos.</p>';
-    });
-}
+        // 3. Renderizar Filtros Dinámicos (Solo marcas por simplicidad)
+        updateDynamicFilters(products);
 
-// ----------------------------------------------------
-// 4. MANEJO DE EVENTOS DE FILTRADO
-// ----------------------------------------------------
-
-/**
- * Inicializa los Event Listeners para la barra lateral.
- */
-function setupEventListeners() {
-    
-    // 1. Filtro de Precio
-    DOMElements.applyPriceBtn.addEventListener('click', () => {
-        const min = parseFloat(DOMElements.minPriceInput.value) || 0;
-        const max = parseFloat(DOMElements.maxPriceInput.value) || Infinity;
-
-        currentFilters.minPrice = min;
-        currentFilters.maxPrice = max;
-
-        // Vuelve a cargar y aplicar filtros (sin llamar a loadProducts, solo re-renderiza)
-        loadProducts(); 
-    });
-
-    // 2. Filtro de Marca (Checkbox)
-    DOMElements.brandFilters.addEventListener('change', (e) => {
-        if (e.target.type === 'checkbox') {
-            const selectedBrands = Array.from(DOMElements.brandFilters.querySelectorAll('input:checked'))
-                                      .map(cb => cb.value);
-            currentFilters.brands = selectedBrands;
-            loadProducts();
-        }
-    });
-
-    // 3. Ordenación
-    DOMElements.sortBySelect.addEventListener('change', (e) => {
-        currentFilters.sortBy = e.target.value;
-        loadProducts(); 
-    });
-}
-
-// ----------------------------------------------------
-// 5. INICIALIZACIÓN
-// ----------------------------------------------------
-
-/**
- * Función que se ejecuta al cargar la página.
- */
-function initProductPage() {
-    // 1. Obtener la categoría inicial de la URL
-    currentFilters.category = getCategoryFromURL();
-
-    // 2. Cargar los Event Listeners para los filtros
-    setupEventListeners();
-
-    // 3. Cargar los Event Listeners del Carrito
-    setupCartEventListeners();
-
-    // 4. Iniciar la consulta a Firebase (onSnapshot)
-    loadProducts();
-
-    // 5. Actualizar el estado visual del menú principal
-    const menuItems = document.querySelectorAll('.main-menu .menu-item');
-    menuItems.forEach(item => {
-        if (item.dataset.category === currentFilters.category) {
-            item.classList.add('active'); // Usar la clase CSS 'active' para resaltarlo
-        } else {
-            item.classList.remove('active');
-        }
-    });
-
-    // 6. Renderizar filtros específicos (simulación)
-    renderSpecificFilters(currentFilters.category);
-}
-
-
-/**
- * Renderiza filtros adicionales basados en la categoría.
- * Esto es importante porque 'Tecnología' necesita 'Memoria RAM', e 'Indumentaria' necesita 'Talla'.
- */
-function renderSpecificFilters(category) {
-    let html = '';
-    
-    if (category === 'tecnologia') {
-        html = `
-            <h4><i class="fas fa-microchip"></i> Especificaciones</h4>
-            <ul class="filter-list">
-                <li><label><input type="checkbox" data-filter="ram" value="8GB"> 8GB RAM</label></li>
-                <li><label><input type="checkbox" data-filter="ram" value="16GB"> 16GB RAM</label></li>
-                <li><label><input type="checkbox" data-filter="disco" value="SSD"> SSD</label></li>
-            </ul>
-        `;
-    } else if (category === 'indumentaria') {
-        html = `
-            <h4><i class="fas fa-ruler"></i> Talla</h4>
-            <ul class="filter-list">
-                <li><label><input type="checkbox" data-filter="talla" value="S"> S</label></li>
-                <li><label><input type="checkbox" data-filter="talla" value="M"> M</label></li>
-                <li><label><input type="checkbox" data-filter="talla" value="L"> L</label></li>
-            </ul>
-            <h4><i class="fas fa-palette"></i> Color</h4>
-            <ul class="filter-list">
-                <li><label><input type="checkbox" data-filter="color" value="Rojo"> Rojo</label></li>
-                <li><label><input type="checkbox" data-filter="color" value="Azul"> Azul</label></li>
-            </ul>
-        `;
-    } else if (category === 'hogar') {
-        html = `
-            <h4><i class="fas fa-couch"></i> Material</h4>
-            <ul class="filter-list">
-                <li><label><input type="checkbox" data-filter="material" value="Madera"> Madera</label></li>
-                <li><label><input type="checkbox" data-filter="material" value="Metal"> Metal</label></li>
-            </ul>
-        `;
+        // 4. Renderizar Productos
+        renderProducts(products);
     }
 
-    DOMElements.specificFiltersGroup.innerHTML = html;
-    // Note: Aquí se añadirían los listeners a estos nuevos checkboxes si se necesita filtrado avanzado.
+    // ----------------------------------------------------
+    // 3. LÓGICA DE INTERFAZ Y EVENTOS
+    // ----------------------------------------------------
+
+    function updateDynamicFilters(products) {
+        const brands = [...new Set(products.map(p => p.marca).filter(Boolean))].sort();
+        brandFilterListEl.innerHTML = brands.map(brand => `
+            <li>
+                <label>
+                    <input type="checkbox" name="marca" value="${brand}" 
+                           ${(currentFilters.marca || []).includes(brand) ? 'checked' : ''}>
+                    ${brand}
+                </label>
+            </li>
+        `).join('');
+        
+        // Ocultar/Mostrar filtros específicos si es necesario (ejemplo con 'capacidad' y 'talla')
+        const specificKey = currentCategory === 'tecnologia' ? 'capacidad' : (currentCategory === 'indumentaria' ? 'talla' : null);
+
+        if (specificKey) {
+            specificFilterGroupEl.style.display = 'block';
+            specificFilterGroupEl.querySelector('h4').innerHTML = `<i class="fas fa-list-alt"></i> ${specificKey.charAt(0).toUpperCase() + specificKey.slice(1)}`;
+
+            const specificValues = [...new Set(products.map(p => p[specificKey]).filter(Boolean))].sort();
+            specificFilterListEl.innerHTML = specificValues.map(value => `
+                <li>
+                    <label>
+                        <input type="checkbox" name="${specificKey}" value="${value}">
+                        ${value}
+                    </label>
+                </li>
+            `).join('');
+
+        } else {
+            specificFilterGroupEl.style.display = 'none';
+        }
+    }
+
+    function setupEventListeners() {
+        // Evento de Ordenamiento
+        sortEl.addEventListener('change', () => {
+            currentSort = sortEl.value;
+            // Al cambiar el orden, volvemos a obtener datos (o re-procesamos el snapshot)
+            startListening();
+        });
+        
+        // Evento de Filtro de Marcas
+        brandFilterListEl.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox' && e.target.name === 'marca') {
+                const selected = Array.from(brandFilterListEl.querySelectorAll('input:checked'))
+                                    .map(input => input.value);
+                currentFilters.marca = selected;
+                startListening();
+            }
+        });
+
+        // Evento de Aplicar Precio
+        document.getElementById('apply-price-filter').addEventListener('click', () => {
+            startListening();
+        });
+
+        // Evento de Limpiar Filtros
+        document.querySelectorAll('.btn-clear-filter').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const filterType = e.target.getAttribute('data-filter-type');
+                if (filterType === 'marca') {
+                    currentFilters.marca = [];
+                    brandFilterListEl.querySelectorAll('input').forEach(input => input.checked = false);
+                }
+                // Limpiar otros filtros si existieran
+                startListening();
+            });
+        });
+    }
+
+    // ----------------------------------------------------
+    // 4. INICIO DE LA LÓGICA DE FIRESTORE
+    // ----------------------------------------------------
+
+    let unsubscribe = null;
+
+    function startListening() {
+        // Detener la escucha anterior si existe
+        if (unsubscribe) {
+            unsubscribe();
+        }
+
+        // Actualizar UI de título
+        titleEl.textContent = getCategoryTitle(currentCategory);
+        loadingMessageEl.style.display = 'block';
+        loadingMessageEl.textContent = "Cargando productos...";
+        productGridEl.innerHTML = ''; // Limpiar grid
+
+        // Crear la consulta de Firestore
+        const q = buildQuery();
+
+        // Iniciar nueva escucha en tiempo real
+        unsubscribe = onSnapshot(q, handleSnapshot, (error) => {
+            console.error("Error al escuchar los productos:", error);
+            loadingMessageEl.textContent = "Error: Conexión con Firebase no iniciada.";
+        });
+    }
+
+    // ----------------------------------------------------
+    // INICIALIZACIÓN
+    // ----------------------------------------------------
+
+    // Determinar la categoría inicial desde la URL
+    currentCategory = urlParams.get('cat') || 'all';
+    
+    // Iniciar la escucha y configurar los eventos
+    setupEventListeners();
+    startListening();
 }
 
 
-// Ejecutar la función principal al cargar el script
-initProductPage();
+// AÑADIMOS ESTO: Esperar a que el script de inicialización de Firebase dispare el evento
+document.addEventListener('firebase-ready', initProductPage);
+console.log("Script js/productos.js cargado. Esperando evento 'firebase-ready'...");
