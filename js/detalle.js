@@ -1,7 +1,9 @@
 // js/detalle.js
 // Lógica principal para la página de detalle del producto.
 
-// ----------------------------------------------------\n// 1. VARIABLES GLOBALES Y DOM\n// ----------------------------------------------------\
+// ----------------------------------------------------
+// 1. VARIABLES GLOBALES Y DOM
+// ----------------------------------------------------
 
 let currentProductId = null;
 let currentProductData = null; // Almacenará los datos del producto cargado
@@ -22,29 +24,20 @@ const DOMElements = {
     addToCartBtn: document.getElementById('add-to-cart-btn')
 };
 
-// ----------------------------------------------------\n// 2. UTILIDADES\n// ----------------------------------------------------
+// ----------------------------------------------------
+// 2. UTILIDADES
+// ----------------------------------------------------
 
-/**
- * Lee la URL para obtener el parámetro 'id' (ID del producto).
- * @returns {string | null} El ID del producto o null si no se encuentra.
- */
 function getProductIdFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('id');
 }
 
-/**
- * Muestra el contenido del producto y oculta el mensaje de carga.
- */
 function showContent() {
     if (DOMElements.loadingMessage) DOMElements.loadingMessage.classList.add('hidden');
     if (DOMElements.productContent) DOMElements.productContent.classList.remove('hidden');
 }
 
-/**
- * Muestra un error en la interfaz.
- * @param {string} message - Mensaje de error a mostrar.
- */
 function displayError(message) {
     if (DOMElements.loadingMessage) {
         DOMElements.loadingMessage.textContent = `Error: ${message}`;
@@ -53,11 +46,10 @@ function displayError(message) {
     if (DOMElements.productContent) DOMElements.productContent.classList.add('hidden');
 }
 
-// ----------------------------------------------------\n// 3. CONSULTA A FIRESTORE Y RENDERIZADO\n// ----------------------------------------------------
+// ----------------------------------------------------
+// 3. CONSULTA A FIRESTORE Y RENDERIZADO
+// ----------------------------------------------------
 
-/**
- * Carga el producto desde Firestore usando su ID.
- */
 async function loadProductDetails() {
     currentProductId = getProductIdFromURL();
 
@@ -66,9 +58,7 @@ async function loadProductDetails() {
         return;
     }
 
-    // Espera a que la conexión con Firebase esté lista
     if (!window.db || !window.doc || !window.getDoc) {
-        // Reintentar después de un breve retraso si Firebase no está listo
         setTimeout(loadProductDetails, 100); 
         return;
     }
@@ -80,7 +70,7 @@ async function loadProductDetails() {
         const productSnap = await window.getDoc(productDocRef);
 
         if (productSnap.exists()) {
-            // Asignamos el ID del documento a los datos del producto.
+            // ¡CORRECCIÓN! Guardamos los datos del producto en la variable global
             currentProductData = { id: productSnap.id, ...productSnap.data() };
             renderProduct(currentProductData);
         } else {
@@ -92,26 +82,26 @@ async function loadProductDetails() {
     }
 }
 
-/**
- * Renderiza la información del producto en los elementos DOM.
- * @param {object} product - Datos del producto cargado.
- */
 function renderProduct(product) {
-    const priceNumber = Number(product.price) || 0;
+    const priceNumber = Number(product.precio) || 0;
     const formattedPrice = priceNumber.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
 
-    DOMElements.pageTitle.textContent = `${product.name} | MegaStore`;
+    DOMElements.pageTitle.textContent = `${product.nombre} | MegaStore`;
     DOMElements.mainImage.src = product.image || 'https://placehold.co/500x400/eeeeee/333333?text=Sin+Imagen';
-    DOMElements.mainImage.alt = product.name;
-    DOMElements.name.textContent = product.name;
-    DOMElements.brand.textContent = product.brand ? `Marca: ${product.brand}` : 'Marca no especificada';
+    DOMElements.mainImage.alt = product.nombre;
+    DOMElements.name.textContent = product.nombre;
+    DOMElements.brand.textContent = product.marca ? `Marca: ${product.marca}` : 'Marca no especificada';
     DOMElements.price.textContent = formattedPrice;
-    DOMElements.description.textContent = product.description || 'Este producto no tiene una descripción detallada.';
+    DOMElements.description.textContent = product.descripcion || 'Este producto no tiene una descripción detallada.';
 
     let specsHtml = '<h4>Especificaciones Clave</h4><ul>';
-    if (product.specs && typeof product.specs === 'object') {
-        for (const key in product.specs) {
-            specsHtml += `<li><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${product.specs[key]}</li>`;
+    const specs = { ...product };
+    // Eliminamos los campos que no son especificaciones para no mostrarlos dos veces
+    delete specs.id; delete specs.nombre; delete specs.marca; delete specs.precio; delete specs.descripcion; delete specs.image; delete specs.categoria;
+
+    if (Object.keys(specs).length > 0) {
+        for (const key in specs) {
+            specsHtml += `<li><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${specs[key]}</li>`;
         }
     } else {
         specsHtml += '<li>No hay especificaciones adicionales disponibles.</li>';
@@ -122,7 +112,9 @@ function renderProduct(product) {
     showContent();
 }
 
-// ----------------------------------------------------\n// 4. LÓGICA DEL CARRITO Y COMPRA\n// ----------------------------------------------------
+// ----------------------------------------------------
+// 4. LÓGICA DEL CARRITO (LOCALSTORAGE)
+// ----------------------------------------------------
 
 const getCart = () => {
     const cart = localStorage.getItem('cart');
@@ -141,6 +133,7 @@ function updateQuantity(delta) {
 }
 
 function addProductToCart() {
+    // Esta función ahora encontrará los datos en 'currentProductData'
     if (!currentProductData) {
         alert("Error: No hay datos del producto.");
         return;
@@ -151,23 +144,25 @@ function addProductToCart() {
     const productInCart = cart.find(item => item.id === currentProductData.id);
 
     if (productInCart) {
-        productInCart.quantity += quantityToAdd;
+        productInCart.cantidad = (productInCart.cantidad || 0) + quantityToAdd;
     } else {
-        cart.push({ 
-            id: currentProductData.id, 
-            name: currentProductData.name, 
-            price: currentProductData.price,
+        const cartProduct = {
+            id: currentProductData.id,
+            nombre: currentProductData.nombre,
+            precio: currentProductData.precio,
             image: currentProductData.image,
-            quantity: quantityToAdd 
-        });
+            cantidad: quantityToAdd
+        };
+        cart.push(cartProduct);
     }
 
     saveCart(cart);
-    alert(`¡${quantityToAdd} unidad(es) de "${currentProductData.name}" se han añadido al carrito!`);
+    alert(`¡${quantityToAdd} unidad(es) de "${currentProductData.nombre}" se han añadido al carrito!`);
 }
 
-
-// ----------------------------------------------------\n// 5. INICIALIZACIÓN\n// ----------------------------------------------------
+// ----------------------------------------------------
+// 5. INICIALIZACIÓN
+// ----------------------------------------------------
 
 function setupEventListeners() {
     DOMElements.qtyMinus.addEventListener('click', () => updateQuantity(-1));
