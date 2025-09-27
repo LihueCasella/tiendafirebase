@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="assets/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
+    <!-- CSS Específico para Detalle -->
     <style>
         .detail-container { display: flex; flex-direction: row; padding: 30px 20px; max-width: 1200px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); gap: 40px; }
         .detail-loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #555; }
@@ -38,11 +39,13 @@
     </style>
 </head>
 <body>
+
     <header class="header">
         <div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;"><h1>MegaStore</h1></a></div>
         <div class="search-bar"><input type="text" placeholder="Buscar productos..."><button aria-label="Buscar"><i class="fas fa-search"></i></button></div>
         <nav class="user-nav"><a href="#" id="auth-status" class="nav-item">Conectando...</a><a href="carrito.html" class="nav-item cart-icon">🛒 Carrito</a></nav>
     </header>
+
     <nav class="main-menu">
         <a href="productos.html?cat=tecnologia" class="menu-item">Tecnología</a>
         <a href="productos.html?cat=indumentaria" class="menu-item">Indumentaria</a>
@@ -50,6 +53,7 @@
         <a href="#" class="menu-item">Ofertas</a>
         <a href="#" class="menu-item">Ayuda</a>
     </nav>
+    
     <main class="container">
         <div id="product-detail-area">
             <p class="detail-loading" id="loading-message">Cargando detalles del producto...</p>
@@ -66,169 +70,51 @@
                             <input type="number" id="qty-input" value="1" min="1" readonly>
                             <button id="qty-plus" aria-label="+">+</button>
                         </div>
-                        <button id="add-to-cart-btn" class="btn-add-to-cart"><i class="fas fa-shopping-cart"></i> Añadir</button>
+                        <button id="add-to-cart-btn" class="btn-add-to-cart"><i class="fas fa-shopping-cart"></i> Añadir al carrito</button>
                     </div>
                     <div class="specifications" id="detail-specs"></div>
                 </div>
             </div>
         </div>
     </main>
+
     <footer class="footer">
         <div class="footer-content"><p>&copy; 2025 MegaStore. Todos los derechos reservados.</p><nav class="footer-links"><a href="#">Términos</a> | <a href="#">Privacidad</a> | <a href="#">Contacto</a></nav></div>
     </footer>
 
+    <!-- Script de Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- DEFINICIONES GLOBALES PARA MANEJO DE ERRORES (CORREGIDO) ---
-        const DOMElements = {
-            loadingMessage: document.getElementById('loading-message'),
-            productContent: document.getElementById('product-content'),
-            pageTitle: document.getElementById('page-title'),
-            mainImage: document.getElementById('detail-main-image'),
-            name: document.getElementById('detail-name'),
-            brand: document.getElementById('detail-brand'),
-            price: document.getElementById('detail-price'),
-            description: document.getElementById('detail-description'),
-            specs: document.getElementById('detail-specs'),
-            qtyMinus: document.getElementById('qty-minus'),
-            qtyPlus: document.getElementById('qty-plus'),
-            qtyInput: document.getElementById('qty-input'),
-            addToCartBtn: document.getElementById('add-to-cart-btn')
-        };
-
-        function displayError(message) {
-            if (DOMElements.loadingMessage) {
-                DOMElements.loadingMessage.textContent = `Error: ${message}`;
-                DOMElements.loadingMessage.style.color = 'red';
-                DOMElements.loadingMessage.classList.remove('hidden');
-            }
-            if (DOMElements.productContent) {
-                DOMElements.productContent.classList.add('hidden');
-            }
-        }
-
-        function initApp() {
-            // --- 1. Inicialización de Firebase (AHORA SEGURA) ---
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            
-            if (!firebaseConfig.projectId) {
-                displayError("La configuración de Firebase no se ha cargado. Verifique que las variables de entorno estén disponibles.");
-                return; 
-            }
-
-            let db;
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        if (firebaseConfig.projectId) {
             try {
                 const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
+                const db = getFirestore(app);
                 const auth = getAuth(app);
+
+                window.db = db;
+                window.doc = doc;
+                window.getDoc = getDoc;
+
                 signInAnonymously(auth).catch(e => console.error("Auth error:", e));
                 onAuthStateChanged(auth, user => {
                     document.getElementById('auth-status').textContent = user ? 'Anónimo' : 'Ingresar';
                 });
-            } catch (e) {
-                console.error("Error inicializando Firebase:", e);
-                displayError("No se pudo conectar a la base de datos. " + e.message);
-                return;
+            } catch(e) {
+                 console.error("Error inicializando Firebase:", e);
+                 document.getElementById('loading-message').textContent = "Error: No se pudo inicializar la conexión con la base de datos.";
             }
-
-            // --- 2. Lógica de la página de detalle ---
-            let currentProductData = null;
-
-            async function loadProductDetails() {
-                const productId = new URLSearchParams(window.location.search).get('id');
-                if (!productId) return displayError("ID de producto no encontrado en la URL.");
-                
-                try {
-                    const productDocRef = doc(db, `artifacts/${appId}/public/data/productos`, productId);
-                    const productSnap = await getDoc(productDocRef);
-
-                    if (productSnap.exists()) {
-                        currentProductData = { id: productSnap.id, ...productSnap.data() };
-                        renderProduct(currentProductData);
-                    } else {
-                        displayError(`El producto con ID "${productId}" no existe.`);
-                    }
-                } catch (error) {
-                    console.error("Error al cargar producto:", error);
-                    displayError("No se pudo cargar la información del producto.");
-                }
-            }
-
-            function renderProduct(product) {
-                const priceNumber = Number(product.precio) || 0;
-                const formattedPrice = priceNumber.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-
-                DOMElements.pageTitle.textContent = `${product.nombre} | MegaStore`;
-                DOMElements.mainImage.src = product.image || 'https://placehold.co/500x400/eeeeee/333333?text=Sin+Imagen';
-                DOMElements.mainImage.alt = product.nombre;
-                DOMElements.name.textContent = product.nombre;
-                DOMElements.brand.textContent = product.marca ? `Marca: ${product.marca}` : 'Marca no especificada';
-                DOMElements.price.textContent = formattedPrice;
-                DOMElements.description.textContent = product.descripcion || 'Este producto no tiene descripción.';
-                
-                let specsHtml = '<h4>Especificaciones</h4><ul>';
-                const technicalSpecs = product.especificaciones || {};
-                if (Object.keys(technicalSpecs).length > 0) {
-                    for (const key in technicalSpecs) {
-                        specsHtml += `<li><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${technicalSpecs[key]}</li>`;
-                    }
-                } else {
-                    specsHtml += '<li>No hay especificaciones adicionales.</li>';
-                }
-                specsHtml += '</ul>';
-                DOMElements.specs.innerHTML = specsHtml;
-
-                DOMElements.loadingMessage.classList.add('hidden');
-                DOMElements.productContent.classList.remove('hidden');
-                DOMElements.addToCartBtn.disabled = false;
-                DOMElements.qtyMinus.disabled = false;
-                DOMElements.qtyPlus.disabled = false;
-            }
-
-            // --- 3. Lógica del Carrito ---
-            const getCart = () => JSON.parse(localStorage.getItem('cart') || '[]');
-            const saveCart = (cart) => localStorage.setItem('cart', JSON.stringify(cart));
-
-            function updateQuantity(delta) {
-                let newQty = (parseInt(DOMElements.qtyInput.value) || 1) + delta;
-                if (newQty < 1) newQty = 1;
-                DOMElements.qtyInput.value = newQty;
-            }
-
-            function addProductToCart() {
-                if (!currentProductData) return alert("Los datos del producto aún no han cargado.");
-                
-                const quantityToAdd = parseInt(DOMElements.qtyInput.value) || 1;
-                const cart = getCart();
-                const productInCart = cart.find(item => item.id === currentProductData.id);
-
-                if (productInCart) {
-                    productInCart.cantidad += quantityToAdd;
-                } else {
-                    cart.push({ id: currentProductData.id, nombre: currentProductData.nombre, precio: currentProductData.precio, image: currentProductData.image, cantidad: quantityToAdd });
-                }
-                saveCart(cart);
-                alert(`"${currentProductData.nombre}" se ha añadido al carrito.`);
-            }
-
-            // --- 4. Arranque ---
-            DOMElements.addToCartBtn.disabled = true;
-            DOMElements.qtyMinus.disabled = true;
-            DOMElements.qtyPlus.disabled = true;
-
-            DOMElements.qtyMinus.addEventListener('click', () => updateQuantity(-1));
-            DOMElements.qtyPlus.addEventListener('click', () => updateQuantity(1));
-            DOMElements.addToCartBtn.addEventListener('click', addProductToCart);
-
-            loadProductDetails();
+        } else {
+            console.error("Firebase config not found");
+            document.getElementById('loading-message').textContent = "Error: La configuración del servidor no fue encontrada.";
         }
-        
-        document.addEventListener('DOMContentLoaded', initApp);
-
     </script>
+    
+    <!-- Script de la página de detalle -->
+    <script src="js/detalle.js"></script>
+
 </body>
 </html>
