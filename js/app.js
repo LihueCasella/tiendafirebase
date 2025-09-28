@@ -1,13 +1,16 @@
-// js/app.js (Versión con más logging para depuración)
+// js/app.js (Versión que usa variables globales de Firebase)
 
-import { db, collection, query, where, limit, getDocs, doc, getDoc } from './firebase-init.js';
+// Ya no importamos nada de firebase, porque todo está en `window`.
 
 export function startFeaturedProducts() {
+    // Esperamos a que los elementos del DOM existan.
+    // Las funciones como `collection`, `getDocs`, `query`, etc., vienen de `window`.
     const tecGrid = document.getElementById('tecnologia-grid');
     const indumentariaGrid = document.getElementById('indumentaria-grid');
     const hogarGrid = document.getElementById('hogar-grid');
     const cartIcon = document.querySelector('.cart-icon');
 
+    // Si no estamos en la página de inicio, no hacemos nada.
     if (!tecGrid || !indumentariaGrid || !hogarGrid) {
         if (typeof updateCartCount === 'function') updateCartCount();
         return;
@@ -23,9 +26,6 @@ export function startFeaturedProducts() {
         try {
             const q = query(collection(db, PRODUCTS_COLLECTION_PATH), where("categoria", "==", category), limit(count));
             const querySnapshot = await getDocs(q);
-            
-            // Log para ver cuántos productos se encontraron
-            console.log(`Categoría '${category}': ${querySnapshot.size} productos encontrados.`);
 
             const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderProducts(products, gridElement);
@@ -39,7 +39,7 @@ export function startFeaturedProducts() {
     function renderProducts(productsToRender, gridElement) {
         gridElement.innerHTML = '';
         if (productsToRender.length === 0) {
-            gridElement.innerHTML = '<p style="text-align: center; padding: 20px;">No hay productos destacados para mostrar.</p>';
+            gridElement.innerHTML = '<p style="text-align: center; padding: 20px;">No hay productos destacados.</p>';
             return;
         }
 
@@ -67,7 +67,7 @@ export function startFeaturedProducts() {
         });
     }
 
-    // --- Lógica del Carrito (sin cambios) ---
+    // --- Lógica del Carrito ---
     const getProductById = async (productId) => {
         const docRef = doc(db, PRODUCTS_COLLECTION_PATH, productId);
         const docSnap = await getDoc(docRef);
@@ -93,8 +93,7 @@ export function startFeaturedProducts() {
         cartIcon.textContent = `🛒 Carrito (${totalItems})`;
     };
 
-    // --- Arranque inicial (ahora pidiendo 2 productos) --- 
-    console.log("Iniciando la carga de productos destacados...");
+    // --- Arranque inicial ---
     loadCategory('tecnologia', tecGrid, 2);
     loadCategory('indumentaria', indumentariaGrid, 2);
     loadCategory('hogar', hogarGrid, 2);

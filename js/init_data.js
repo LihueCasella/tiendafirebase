@@ -1,14 +1,13 @@
-// js/init_data.js (Versión final con DOMContentLoaded)
+// js/init_data.js (Versión que usa variables globales de Firebase)
 
-import { db, collection, getDocs, addDoc } from './firebase-init.js';
 import { startFeaturedProducts } from './app.js';
 
-// Envolvemos toda la lógica en un listener que espera a que el DOM esté completamente cargado.
-// Esta es la solución definitiva para evitar condiciones de carrera.
-document.addEventListener('DOMContentLoaded', () => {
+// Esperamos al evento personalizado que indica que Firebase está listo.
+document.addEventListener('firebase-ready', () => {
 
-    console.log("El DOM se ha cargado completamente. Iniciando la aplicación...");
+    console.log("Evento 'firebase-ready' recibido. Iniciando la lógica de la aplicación...");
 
+    // Las funciones de Firebase como collection, getDocs, addDoc ahora están en `window`
     const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     const PRODUCTS_COLLECTION_PATH = `/artifacts/${APP_ID}/public/data/productos`;
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION_PATH);
@@ -35,16 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     await addDoc(productsCollectionRef, product);
                 }
                 console.log("¡Productos de prueba insertados con éxito!");
-            } else {
-                console.log(`Ya existen ${snapshot.size} productos. Inicialización omitida.`);
             }
             
-            console.log("Datos listos. Llamando a startFeaturedProducts...");
+            // Llamamos a la función que renderiza los productos.
             startFeaturedProducts();
 
         } catch (error) {
-            console.error("Error CRÍTICO en el script de inicialización (main):", error);
-            // Aunque haya un error, intentamos mostrar los productos que ya existan.
+            console.error("Error en el script de inicialización (main):", error);
+            // Si hay un error, al menos intentamos renderizar los productos que ya existan.
             startFeaturedProducts();
         }
     }
