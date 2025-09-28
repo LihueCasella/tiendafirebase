@@ -12,5 +12,6 @@ const firebaseConfig = {
   appId: "1:1046723710083:web:f6618809a1b3c9bb30dfb6"
 };
 
-// Hacemos la configuración accesible globalmente
-window.__firebase_config = JSON.stringify(firebaseConfig);
+// --- CORRECCIÓN ---
+// Exponemos el OBJETO de configuración directamente, no un string.
+window.__firebase_config = firebaseConfig;

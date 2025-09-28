@@ -79,12 +79,15 @@
         <div class="footer-content"><p>&copy; 2025 MegaStore. Todos los derechos reservados.</p><nav class="footer-links"><a href="#">Términos</a> | <a href="#">Privacidad</a> | <a href="#">Contacto</a></nav></div>
     </footer>
 
-    <!-- === SCRIPTS DE LA APLICACIÓN (CORREGIDO) === -->
-    <!-- 1. Carga la configuración de Firebase -->
+    <!-- === SCRIPTS DE LA APLICACIÓN (VERSIÓN FINAL Y CORRECTA) === -->
+    
+    <!-- 1. Carga la configuración de Firebase. Se ejecuta primero. -->
     <script src="js/config.js"></script>
-    <!-- 2. Inicializa Firebase -->
+    
+    <!-- 2. Inicializa Firebase. Es un módulo y depende de config.js -->
     <script type="module" src="js/firebase-init.js"></script>
-    <!-- 3. Ejecuta la lógica de la página de detalle -->
+    
+    <!-- 3. Ejecuta la lógica de la página. 'defer' asegura que se ejecute después de que el HTML esté parseado y espera a los scripts anteriores. -->
     <script defer src="js/detalle.js"></script>
 
 </body>

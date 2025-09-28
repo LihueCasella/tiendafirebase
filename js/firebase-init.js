@@ -1,28 +1,27 @@
+// js/firebase-init.js (CORREGIDO Y RESTAURADO)
 
-// js/firebase-init.js (CORREGIDO)
-
-// --- IMPORTANTE: Se usan las URLs completas de la CDN de Firebase ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 function initializeFirebase() {
-    // Reintentar hasta que la configuración y el DOM estén listos.
-    if (typeof window.__firebase_config === 'undefined' || !document.body) {
+    // Reintentar hasta que la configuración (como objeto) esté lista.
+    if (typeof window.__firebase_config !== 'object' || !window.__firebase_config) {
+        console.warn("El objeto de configuración de Firebase no está listo, reintentando...");
         setTimeout(initializeFirebase, 50);
         return;
     }
 
     try {
-        // 1. Inicializar Firebase con la configuración global
-        const firebaseConfig = JSON.parse(window.__firebase_config);
+        // --- CORRECCIÓN CLAVE ---
+        // Usamos el objeto de configuración directamente, SIN JSON.parse().
+        const firebaseConfig = window.__firebase_config;
         const app = initializeApp(firebaseConfig);
 
-        // 2. Obtener los servicios necesarios
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // 3. Exponer los objetos y funciones de Firebase en `window` para que otros scripts los puedan usar
+        // Exponer los objetos y funciones de Firebase en `window`
         window.db = db;
         window.auth = auth;
         window.doc = doc;
@@ -33,9 +32,8 @@ function initializeFirebase() {
         window.onSnapshot = onSnapshot;
         window.runTransaction = runTransaction;
 
-        // 4. Autenticación anónima para los visitantes
+        // Autenticación anónima
         signInAnonymously(auth).catch(e => console.error("Error de autenticación anónima:", e));
-        
         onAuthStateChanged(auth, user => {
             const authStatus = document.getElementById('auth-status');
             if (authStatus) {
@@ -43,13 +41,12 @@ function initializeFirebase() {
             }
         });
 
-        // 5. Disparar un evento para notificar al resto de la aplicación que Firebase está listo
+        // Disparar el evento para notificar que Firebase está listo
         console.log("Firebase está listo. Despachando evento 'firebase-ready'.");
         document.dispatchEvent(new CustomEvent('firebase-ready'));
 
     } catch (e) {
         console.error("Error CRÍTICO al inicializar Firebase:", e);
-        // Mostrar un error visible al usuario si todo falla
         const loadingMessage = document.getElementById('loading-message');
         if (loadingMessage) {
             loadingMessage.textContent = "Error CRÍTICO: No se pudo conectar a la base de datos.";
@@ -58,5 +55,4 @@ function initializeFirebase() {
     }
 }
 
-// Iniciar el proceso de inicialización
 initializeFirebase();
