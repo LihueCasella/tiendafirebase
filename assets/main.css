@@ -1,410 +1,252 @@
-/* 1. RESET BÁSICO Y VARIABLES */
-:root {
-    --color-primary: #85f5b0; /* Un rojo fuerte, similar al del logo COMPRA GAMER */
-    --color-secondary: #007bff;
-    --color-dark: #1a1a1a;
-    --color-light: #f4f4f4;
-    --color-text: #333;
-    --color-background: #ffffff;
-    --padding-base: 20px;
-    --border-radius: 6px;
+/* assets/main.css */
+
+/* Reset y configuración base */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    /* --- Solución para el Footer --- */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ocupa al menos toda la altura de la pantalla */
 }
 
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: var(--color-text);
-    background-color: var(--color-light);
-    line-height: 1.6;
-}
-
-a {
-    text-decoration: none;
-    color: var(--color-text);
-}
-
+/* Contenedor principal para centrar contenido */
 .container {
     width: 90%;
     max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--padding-base) 0;
+    margin: 20px auto;
+    /* --- Solución para el Footer --- */
+    flex: 1; /* Hace que el contenido principal ocupe el espacio sobrante */
 }
-/* 2. HEADER Y BARRA SUPERIOR */
+
+/* Header y Navegación */
 .header {
-    background-color: var(--color-dark);
-    padding: 10px var(--padding-base);
+    background-color: #fff;
+    padding: 15px 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .logo h1 {
-    color: var(--color-primary);
-    font-size: 1.8rem;
-    font-weight: 700;
+    margin: 0;
+    font-size: 1.8em;
+    color: #2a9d8f; /* Un color verde azulado atractivo */
 }
 
 .search-bar {
     display: flex;
-    flex-grow: 1; /* Permite que ocupe espacio entre el logo y los íconos */
-    max-width: 500px;
-    margin: 0 30px;
+    width: 40%;
 }
 
 .search-bar input {
     width: 100%;
-    padding: 10px 15px;
-    border: none;
-    border-radius: var(--border-radius) 0 0 var(--border-radius);
-    font-size: 1rem;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
 }
 
 .search-bar button {
-    background-color: var(--color-primary);
+    padding: 8px 12px;
+    border: 1px solid #2a9d8f;
+    background-color: #2a9d8f;
     color: white;
-    border: none;
-    padding: 10px 15px;
     cursor: pointer;
-    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    border-radius: 0 4px 4px 0;
 }
 
-.user-nav .nav-item {
-    color: white;
-    margin-left: 15px;
-    padding: 5px;
-    transition: color 0.3s;
-}
-
-.user-nav .nav-item:hover {
-    color: var(--color-primary);
-}
-
-
-/* 3. MENÚ PRINCIPAL (Tecnología, Indumentaria, Hogar) */
-.main-menu {
-    background-color: var(--color-background);
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    justify-content: center;
-    padding: 10px 0;
-}
-
-.main-menu .menu-item {
-    padding: 8px 25px;
-    font-weight: 600;
-    text-transform: uppercase;
-    transition: color 0.3s, border-bottom 0.3s;
-}
-
-.main-menu .menu-item:hover {
-    color: var(--color-primary);
-    border-bottom: 3px solid var(--color-primary);
-}
-/* 4. HERO BANNER */
-.hero-banner {
-    background: url('placeholder-banner.jpg') no-repeat center center/cover; /* Usarás una imagen de alta calidad aquí */
-    min-height: 400px;
+.user-nav {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: white;
-    text-align: center;
-    margin-bottom: 40px;
-    position: relative;
-    /* Fondo oscuro para que el texto resalte (simulando el diseño de Compra Gamer) */
-    background-color: var(--color-dark);
 }
 
-.banner-content {
-    padding: 40px;
-    max-width: 700px;
+.nav-item {
+    margin-left: 20px;
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+}
+
+.cart-icon {
+    font-weight: bold;
+}
+
+/* Menú Principal */
+.main-menu {
+    background-color: #343a40;
+    padding: 12px 5%;
+    display: flex;
+    justify-content: center;
+}
+
+.menu-item {
+    color: white;
+    margin: 0 20px;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 5px 0;
+    border-bottom: 2px solid transparent;
+    transition: border-bottom-color 0.3s;
+}
+
+.menu-item:hover {
+    border-bottom-color: #2a9d8f;
+}
+
+/* Hero Banner */
+.hero-banner {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('assets/placeholder-banner.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    padding: 80px 20px;
 }
 
 .banner-content h2 {
-    font-size: 3rem;
+    font-size: 2.8em;
     margin-bottom: 10px;
-    font-weight: 800;
 }
 
 .banner-content p {
-    font-size: 1.2rem;
-    margin-bottom: 30px;
+    font-size: 1.2em;
+    margin-bottom: 25px;
 }
 
-/* 5. BOTONES REUTILIZABLES */
+/* Botones */
 .btn {
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
     display: inline-block;
-    padding: 10px 25px;
-    border-radius: var(--border-radius);
-    text-transform: uppercase;
-    font-weight: 600;
-    transition: background-color 0.3s;
-    border: 1px solid transparent;
+    border: none;
 }
 
 .btn-primary {
-    background-color: var(--color-primary);
+    background-color: #2a9d8f;
     color: white;
+    transition: background-color 0.3s;
 }
 
 .btn-primary:hover {
-    background-color: #00e0cd; /* Rojo más oscuro al pasar el ratón */
+    background-color: #228a7d;
 }
 
 .btn-small {
-    padding: 8px 15px;
-    font-size: 0.85rem;
-    background-color: var(--color-dark);
-    color: white;
+    padding: 6px 12px;
+    font-size: 0.9em;
 }
-.btn-small:hover {
-    background-color: var(--color-primary);
-}
-/* 6. PRODUCTOS DESTACADOS Y GRILLA */
+
+/* Grid de Productos */
 .section-title {
     text-align: center;
-    font-size: 2rem;
+    font-size: 2em;
     margin-bottom: 30px;
-    padding-top: 20px;
-    border-bottom: 3px solid var(--color-primary);
-    display: inline-block;
-    width: auto;
-    margin: 0 auto 30px auto;
-    display: block;
-    text-align: center;
+    color: #333;
 }
 
-.category-tabs {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.tab-btn {
-    background: none;
-    border: none;
-    padding: 10px 20px;
-    margin: 0 5px;
-    cursor: pointer;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-text);
-    transition: color 0.3s, border-bottom 0.3s;
-}
-
-.tab-btn.active,
-.tab-btn:hover {
-    color: var(--color-primary);
-    border-bottom: 3px solid var(--color-primary);
-}
-
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 4 columnas en desktop */
-    gap: 30px;
-    margin-bottom: 50px;
-}
-
-.product-card {
-    background-color: var(--color-background);
-    border: 1px solid #e0e0e0;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    text-align: center;
-    padding: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-.product-card img {
-    width: 100%;
-    height: 200px;
-    object-fit: contain; /* Perfecto para Tecnología y Moda/Hogar */
-    margin-bottom: 15px;
-}
-
-.product-info {
-    padding: 10px 0;
-}
-
-.product-name {
-    font-size: 1rem;
-    font-weight: 500;
-    margin-bottom: 5px;
-    height: 40px; /* Asegura que todas las tarjetas tengan la misma altura de texto */
-    overflow: hidden;
-}
-
-.product-price {
-    font-size: 1.4rem;
-    color: var(--color-primary);
-    font-weight: 700;
-    margin-bottom: 15px;
-}/* 7. FOOTER */
-.footer {
-    background-color: var(--color-dark);
-    color: var(--color-light);
-    padding: 30px 0;
-    text-align: center;
-    margin-top: 40px;
-}
-
-.footer-content p {
-    margin-bottom: 10px;
-}
-
-.footer-links a {
-    color: var(--color-light);
-    margin: 0 10px;
-}
-
-.footer-links a:hover {
-    color: var(--color-primary);
-}
-
-
-/* 8. RESPONSIVIDAD BÁSICA */
-@media (max-width: 768px) {
-    /* Ajustes para tabletas */
-    .header {
-        flex-wrap: wrap;
-    }
-    .search-bar {
-        order: 3; /* Mueve la barra de búsqueda debajo del logo */
-        width: 100%;
-        margin: 15px 0 0 0;
-    }
-    .main-menu {
-        justify-content: flex-start;
-        overflow-x: auto; /* Permite desplazamiento horizontal en el menú */
-        white-space: nowrap;
-    }
-    .main-menu .menu-item {
-        padding: 8px 15px;
-    }
-    .hero-banner {
-        min-height: 250px;
-    }
-    .banner-content h2 {
-        font-size: 2rem;
-    }
-    .product-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Menos columnas en móvil */
-    }
-}
-/* -------------------------------------------------------------------- */
-/* 9. ESTILOS ESPECÍFICOS PARA LA PÁGINA DE PRODUCTOS (productos.html) */
-/* -------------------------------------------------------------------- */
-
-.product-page-layout {
-    display: flex;
-    gap: 30px; /* Espacio entre la barra lateral y los productos */
-    padding-top: 40px;
-}
-
-.sidebar-filters {
-    width: 280px; /* Ancho fijo para la barra lateral */
-    flex-shrink: 0; /* Evita que se encoja */
-    background-color: var(--color-background);
-    padding: 20px;
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.product-listing {
-    flex-grow: 1; /* Permite que el listado de productos ocupe el resto del espacio */
-}
-
-.filter-title {
-    font-size: 1.4rem;
-    color: var(--color-primary);
+.category-section h3 {
+    font-size: 1.5em;
+    color: #444;
     border-bottom: 2px solid #eee;
     padding-bottom: 10px;
     margin-bottom: 20px;
 }
 
-.filter-group {
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 1px dashed #ddd;
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
 }
 
-.filter-group h4 {
-    font-size: 1.1rem;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.filter-list {
-    list-style: none;
-}
-
-.filter-list li {
-    margin-bottom: 8px;
-}
-
-.filter-list label {
-    cursor: pointer;
-    font-size: 0.95rem;
-}
-
-/* Estilos de Rango de Precio */
-.price-range {
+.product-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.3s, transform 0.3s;
+    text-decoration: none;
+    color: inherit;
     display: flex;
-    align-items: center;
-    gap: 5px;
+    flex-direction: column;
 }
 
-.price-range input {
-    width: 70px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: var(--border-radius);
+.product-card-link {
+    text-decoration: none;
+}
+
+.product-card:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    transform: translateY(-5px);
+}
+
+.product-card img {
+    width: 100%;
+    height: 200px; /* Altura fija para la imagen */
+    object-fit: cover; /* Asegura que la imagen cubra el espacio sin distorsionarse */
+}
+
+.product-info {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-name {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 0 0 10px 0;
+    flex-grow: 1;
+}
+
+.product-price {
+    color: #2a9d8f;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.add-to-cart {
+    background-color: #3498db;
+    color: white;
+    width: 100%;
+}
+
+/* Footer */
+.footer {
+    background-color: #343a40;
+    color: #f8f9fa;
+    padding: 20px 5%;
     text-align: center;
+    border-top: 1px solid #444;
+    width: 100%; /* Asegura que ocupe todo el ancho */
 }
 
-#apply-price-filter {
-    background-color: var(--color-secondary); /* Azul para la acción de filtro */
-}
-#apply-price-filter:hover {
-    background-color: #0060c0;
-}
-
-/* Opciones de Ordenación */
-.sort-options {
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    padding: 10px;
-    background-color: var(--color-background);
-    border-radius: var(--border-radius);
 }
 
-.sort-options select {
-    padding: 8px;
-    border-radius: var(--border-radius);
-    border: 1px solid #ccc;
+.footer-links a {
+    color: #f8f9fa;
+    text-decoration: none;
+    margin: 0 10px;
 }
 
-/* Responsividad para la página de productos (Móvil) */
-@media (max-width: 768px) {
-    .product-page-layout {
-        flex-direction: column; /* Apila la barra lateral y el listado */
-    }
-    .sidebar-filters {
-        width: 100%; /* La barra lateral ocupa todo el ancho */
-    }
-    .product-listing h2 {
-        text-align: center;
-    }
+.footer-links a:hover {
+    text-decoration: underline;
 }
