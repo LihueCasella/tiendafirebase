@@ -1,5 +1,4 @@
 // js/detalle.js (Versión Definitiva)
-// Espera la señal "firebase-ready" y busca las variables en el scope global `window`.
 
 // ----------------------------------------------------
 // 1. DEFINICIÓN DE FUNCIONES PRINCIPALES
@@ -33,7 +32,6 @@ async function loadProductDetails() {
         return displayError("La conexión con la base de datos (Firebase) no está disponible.");
     }
     
-    // CORRECCIÓN: Buscar la variable `__app_id` en el objeto `window` global.
     const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
     if (appId === 'default-app-id') {
         console.warn("No se encontró `__app_id` en `window`. Usando valor por defecto.");
@@ -87,7 +85,6 @@ function setupActionButtons() {
                 return;
             }
             const quantity = parseInt(qtyInput.value) || 1;
-            // Lógica para añadir al carrito
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const existingProductIndex = cart.findIndex(item => item.id === currentProductData.id);
             if (existingProductIndex > -1) {
@@ -112,16 +109,21 @@ function setupActionButtons() {
 
 
 // ----------------------------------------------------
-// 3. PUNTO DE ENTRADA: ESPERAR LA SEÑAL DE FIREBASE
+// 3. PUNTO DE ENTRADA (CON LÓGICA ANTI-RACE-CONDITION)
 // ----------------------------------------------------
 
-function main() {
-    console.log("Señal 'firebase-ready' recibida. Ejecutando lógica de la página de detalle.");
+function initDetailPage() {
+    console.log("Ejecutando lógica de la página de detalle.");
     document.getElementById('add-to-cart-btn').disabled = true;
     loadProductDetails();
     setupActionButtons();
 }
 
-// El script espera a que el evento "firebase-ready" sea disparado desde el HTML.
-document.addEventListener('firebase-ready', main);
-
+// Comprobamos si Firebase ya está listo.
+if (window.db) {
+    // Si ya está listo, ejecuta la lógica de la página inmediatamente.
+    initDetailPage();
+} else {
+    // Si no, espera a la señal 'firebase-ready'.
+    document.addEventListener('firebase-ready', initDetailPage);
+}
