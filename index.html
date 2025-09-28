@@ -42,17 +42,32 @@
     
     <!-- 3. PRODUCTOS DESTACADOS POR CATEGORÍA -->
     <main class="container">
-        <h2 class="section-title">Nuestros productos destacados</h2>
+        <h2 class="section-title">Nuestros Productos Destacados</h2>
 
-        <div class="category-tabs">
-            <button class="tab-btn active">Tecnología</button>
-            <button class="tab-btn">Indumentaria</button>
-            <button class="tab-btn">Hogar</button>
-        </div>
-        
-        <div class="product-grid">
-            <!-- Las tarjetas de producto se generarán aquí con JavaScript -->
-        </div> 
+        <!-- Sección para Tecnología -->
+        <section class="category-section">
+            <h3>Tecnología</h3>
+            <div class="product-grid" id="tecnologia-grid">
+                <!-- Los productos de tecnología se cargarán aquí -->
+            </div>
+        </section>
+
+        <!-- Sección para Indumentaria -->
+        <section class="category-section">
+            <h3>Indumentaria</h3>
+            <div class="product-grid" id="indumentaria-grid">
+                <!-- Los productos de indumentaria se cargarán aquí -->
+            </div>
+        </section>
+
+        <!-- Sección para Hogar -->
+        <section class="category-section">
+            <h3>Hogar</h3>
+            <div class="product-grid" id="hogar-grid">
+                <!-- Los productos de hogar se cargarán aquí -->
+            </div>
+        </section>
+
     </main>
 
     <!-- 4. FOOTER -->
@@ -68,14 +83,8 @@
     </footer>
 
     <!-- 5. SCRIPTS (CARGA EN ORDEN) -->
-    <!-- Carga la configuración de Firebase -->
     <script src="js/config.js"></script>
-    <!-- Inicializa Firebase (es un módulo) -->
-    <script type="module" src="js/firebase-init.js"></script>
-    <!-- Carga los datos iniciales si es necesario -->
-    <script type="module" src="js/init_data.js"></script>
-    <!-- Carga la lógica de la aplicación (con 'defer' para garantizar el orden) -->
-    <script defer src="js/app.js"></script>
+    <script type="module" src="js/init_data.js" defer></script>
     
 </body>
 </html>
