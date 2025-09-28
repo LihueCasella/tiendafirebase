@@ -195,4 +195,15 @@ function initProductPage() {
     startListening();
 }
 
-document.addEventListener('firebase-ready', initProductPage);
+// --- CORRECCIÓN DEFINITIVA (ANTI-RACE-CONDITION) ---
+function main() {
+    if (window.db) {
+        // Si Firebase ya está listo, ejecuta la lógica de la página inmediatamente.
+        initProductPage();
+    } else {
+        // Si no, espera a la señal 'firebase-ready'.
+        document.addEventListener('firebase-ready', initProductPage);
+    }
+}
+
+main();
