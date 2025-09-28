@@ -8,7 +8,7 @@
 </head>
 <body>
 
-    <!-- 1. BARRA SUPERIOR Y NAVEGACIÓN PRINCIPAL -->
+    <!-- Contenido de la página -->
     <header class="header">
         <div class="logo">
             <h1>MegaStore</h1> 
@@ -31,7 +31,6 @@
         <a href="#" class="menu-item">Ayuda</a>
     </nav>
 
-    <!-- 2. SECCIÓN DESTACADA (Banner Principal) -->
     <section class="hero-banner">
         <div class="banner-content">
             <h2>Manten tu vida al máximo.</h2>
@@ -40,37 +39,26 @@
         </div>
     </section>
     
-    <!-- 3. PRODUCTOS DESTACADOS POR CATEGORÍA -->
     <main class="container">
         <h2 class="section-title">Nuestros Productos Destacados</h2>
 
-        <!-- Sección para Tecnología -->
         <section class="category-section">
             <h3>Tecnología</h3>
-            <div class="product-grid" id="tecnologia-grid">
-                <!-- Los productos de tecnología se cargarán aquí -->
-            </div>
+            <div class="product-grid" id="tecnologia-grid"></div>
         </section>
 
-        <!-- Sección para Indumentaria -->
         <section class="category-section">
             <h3>Indumentaria</h3>
-            <div class="product-grid" id="indumentaria-grid">
-                <!-- Los productos de indumentaria se cargarán aquí -->
-            </div>
+            <div class="product-grid" id="indumentaria-grid"></div>
         </section>
 
-        <!-- Sección para Hogar -->
         <section class="category-section">
             <h3>Hogar</h3>
-            <div class="product-grid" id="hogar-grid">
-                <!-- Los productos de hogar se cargarán aquí -->
-            </div>
+            <div class="product-grid" id="hogar-grid"></div>
         </section>
 
     </main>
 
-    <!-- 4. FOOTER -->
     <footer class="footer">
         <div class="footer-content">
             <p>&copy; 2025 MegaStore. Todos los derechos reservados a Lihue Casella.</p>
@@ -82,9 +70,10 @@
         </div>
     </footer>
 
-    <!-- 5. SCRIPTS (CARGA EN ORDEN) -->
-    <script src="js/config.js"></script>
-    <script type="module" src="js/init_data.js" defer></script>
+    <!-- SCRIPTS CARGADOS AL FINAL Y CON VERSIÓN PARA EVITAR CACHÉ -->
+    <!-- La lógica de inicialización ahora espera al evento DOMContentLoaded -->
+    <script src="js/config.js?v=4"></script>
+    <script type="module" src="js/init_data.js?v=4"></script>
     
 </body>
 </html>

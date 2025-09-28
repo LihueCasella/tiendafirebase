@@ -1,19 +1,14 @@
-// js/app.js (Versión para mostrar categorías separadas en la página principal)
+// js/app.js (Versión con más logging para depuración)
 
-// Importamos las funciones de Firebase que necesitamos
 import { db, collection, query, where, limit, getDocs, doc, getDoc } from './firebase-init.js';
 
-// La función principal se exporta para ser llamada desde init_data.js
 export function startFeaturedProducts() {
-    // Obtenemos los contenedores para cada categoría
     const tecGrid = document.getElementById('tecnologia-grid');
     const indumentariaGrid = document.getElementById('indumentaria-grid');
     const hogarGrid = document.getElementById('hogar-grid');
     const cartIcon = document.querySelector('.cart-icon');
 
-    // Si no estamos en la página de inicio (no se encuentran los grids), no hacemos nada.
     if (!tecGrid || !indumentariaGrid || !hogarGrid) {
-        // Actualizamos el contador del carrito en otras páginas si la función existe
         if (typeof updateCartCount === 'function') updateCartCount();
         return;
     }
@@ -21,21 +16,16 @@ export function startFeaturedProducts() {
     const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     const PRODUCTS_COLLECTION_PATH = `/artifacts/${APP_ID}/public/data/productos`;
 
-    /**
-     * Carga productos de una categoría específica y los renderiza en su contenedor.
-     * @param {string} category - El nombre de la categoría a buscar.
-     * @param {HTMLElement} gridElement - El elemento del DOM donde se renderizarán los productos.
-     * @param {number} count - El número de productos a traer.
-     */
     async function loadCategory(category, gridElement, count) {
         if (!category || !gridElement) return;
-
         gridElement.innerHTML = '<p style="text-align: center; padding: 20px;">Cargando...</p>';
 
         try {
-            // Usamos getDocs para una carga única, es más eficiente que onSnapshot para esto.
             const q = query(collection(db, PRODUCTS_COLLECTION_PATH), where("categoria", "==", category), limit(count));
             const querySnapshot = await getDocs(q);
+            
+            // Log para ver cuántos productos se encontraron
+            console.log(`Categoría '${category}': ${querySnapshot.size} productos encontrados.`);
 
             const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderProducts(products, gridElement);
@@ -46,15 +36,10 @@ export function startFeaturedProducts() {
         }
     }
 
-    /**
-     * Renderiza una lista de productos en un elemento del DOM específico.
-     * @param {Array} productsToRender - El array de productos.
-     * @param {HTMLElement} gridElement - El elemento contenedor.
-     */
     function renderProducts(productsToRender, gridElement) {
         gridElement.innerHTML = '';
         if (productsToRender.length === 0) {
-            gridElement.innerHTML = '<p style="text-align: center; padding: 20px;">No hay productos en esta categoría.</p>';
+            gridElement.innerHTML = '<p style="text-align: center; padding: 20px;">No hay productos destacados para mostrar.</p>';
             return;
         }
 
@@ -73,7 +58,6 @@ export function startFeaturedProducts() {
             `;
         });
 
-        // Re-asignamos los listeners a los nuevos botones "Añadir" de esta sección
         gridElement.querySelectorAll('.add-to-cart').forEach(button => {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -109,10 +93,10 @@ export function startFeaturedProducts() {
         cartIcon.textContent = `🛒 Carrito (${totalItems})`;
     };
 
-    // --- Arranque inicial --- 
-    console.log("Cargando productos destacados por categoría...");
-    loadCategory('tecnologia', tecGrid, 3);
-    loadCategory('indumentaria', indumentariaGrid, 3);
-    loadCategory('hogar', hogarGrid, 3);
+    // --- Arranque inicial (ahora pidiendo 2 productos) --- 
+    console.log("Iniciando la carga de productos destacados...");
+    loadCategory('tecnologia', tecGrid, 2);
+    loadCategory('indumentaria', indumentariaGrid, 2);
+    loadCategory('hogar', hogarGrid, 2);
     updateCartCount();
 }
