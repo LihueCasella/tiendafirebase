@@ -128,5 +128,5 @@ function initializeApp() {
 }
 
 // --- Punto de Entrada Principal ---
-// Se asegura de que el código se ejecute solo cuando Firebase esté listo.
-document.addEventListener('firebase-ready', initializeApp);
+// Se asegura de que el código se ejecute solo cuando los datos estén listos.
+document.addEventListener('data-ready', initializeApp);

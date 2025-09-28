@@ -118,6 +118,8 @@ document.addEventListener('firebase-ready', async () => {
         const snapshot = await getDocs(productsCollectionRef);
         if (snapshot.size > 0) {
             console.log(`Ya existen ${snapshot.size} productos. Inicialización omitida.`);
+            // DISPARAMOS EL EVENTO IGUALMENTE PARA QUE LA APP CARGUE LOS DATOS
+            document.dispatchEvent(new CustomEvent('data-ready'));
             return;
         }
 
@@ -128,7 +130,8 @@ document.addEventListener('firebase-ready', async () => {
         }
 
         console.log("¡Productos de prueba insertados con éxito en Firestore!");
-        console.log(`Colección: ${PRODUCTS_COLLECTION_PATH}`);
+        // DISPARAMOS EL EVENTO PARA INDICAR QUE LOS DATOS ESTÁN LISTOS
+        document.dispatchEvent(new CustomEvent('data-ready'));
 
     } catch (error) {
         console.error("Error al inicializar los datos:", error);
