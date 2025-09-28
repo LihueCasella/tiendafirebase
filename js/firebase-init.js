@@ -1,17 +1,19 @@
-// js/firebase-init.js (CORREGIDO)
+// js/firebase-init.js (CORREGIDO OTRA VEZ)
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, collection, query, where, getDocs, limit, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 function initializeFirebase() {
-    if (typeof window.firebaseConfig === 'undefined') {
-        console.error("La configuración de Firebase (firebaseConfig) no se encontró. Asegúrate de que js/config.js se cargue primero.");
+    // CORRECCIÓN: Usar la variable correcta `__firebase_config` que viene de config.js
+    if (typeof window.__firebase_config === 'undefined') {
+        console.error("La configuración de Firebase (__firebase_config) no se encontró. Asegúrate de que js/config.js se cargue primero.");
         return;
     }
 
     try {
-        const app = initializeApp(window.firebaseConfig);
+        // Usa la configuración correcta
+        const app = initializeApp(window.__firebase_config);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
@@ -23,8 +25,8 @@ function initializeFirebase() {
         window.collection = collection;
         window.query = query;
         window.where = where;
-        window.getDocs = getDocs; // <-- FALTABA ESTO
-        window.limit = limit;     // <-- Y FALTABA ESTO
+        window.getDocs = getDocs;
+        window.limit = limit;
         window.runTransaction = runTransaction;
 
         signInAnonymously(auth).catch(e => console.error("Error de autenticación anónima:", e));
