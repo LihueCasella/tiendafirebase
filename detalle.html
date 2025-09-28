@@ -7,9 +7,6 @@
     <link rel="stylesheet" href="assets/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
-    <!-- SCRIPT DE CONFIGURACIÓN DE FIREBASE (AÑADIDO) -->
-    <script src="js/config/firebase.js"></script>
-
     <style>
         .detail-container { display: flex; flex-direction: row; padding: 30px 20px; max-width: 1200px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); gap: 40px; }
         .detail-loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #555; }
@@ -82,54 +79,13 @@
         <div class="footer-content"><p>&copy; 2025 MegaStore. Todos los derechos reservados.</p><nav class="footer-links"><a href="#">Términos</a> | <a href="#">Privacidad</a> | <a href="#">Contacto</a></nav></div>
     </footer>
 
-    <!-- SCRIPT DE INICIALIZACIÓN DE FIREBASE (CORREGIDO Y ROBUSTO) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        function initializeFirebase() {
-            // CORRECCIÓN: Buscar la configuración en el objeto `window` global.
-            if (typeof window.__firebase_config === 'undefined') {
-                console.warn("Configuración de Firebase no encontrada en `window`, reintentando en 100ms...");
-                setTimeout(initializeFirebase, 100);
-                return;
-            }
-
-            try {
-                const firebaseConfig = JSON.parse(window.__firebase_config);
-                const app = initializeApp(firebaseConfig);
-                const db = getFirestore(app);
-                const auth = getAuth(app);
-
-                // Exponer las dependencias necesarias en el objeto `window`
-                window.db = db;
-                window.doc = doc;
-                window.getDoc = getDoc;
-                
-                signInAnonymously(auth).catch(e => console.error("Auth error:", e));
-                onAuthStateChanged(auth, user => {
-                    const authStatus = document.getElementById('auth-status');
-                    if(authStatus) authStatus.textContent = user ? 'Anónimo' : 'Ingresar';
-                });
-
-                console.log("Firebase está listo. Enviando señal 'firebase-ready'.");
-                document.dispatchEvent(new Event('firebase-ready'));
-
-            } catch (e) {
-                console.error("Error fatal al inicializar Firebase:", e);
-                const loadingMessage = document.getElementById('loading-message');
-                if (loadingMessage) {
-                    loadingMessage.textContent = "Error CRÍTICO: No se pudo conectar a la base de datos.";
-                    loadingMessage.style.color = 'red';
-                }
-            }
-        }
-        
-        initializeFirebase();
-    </script>
-    
-    <script src="js/detalle.js"></script>
+    <!-- === SCRIPTS DE LA APLICACIÓN (CORREGIDO) === -->
+    <!-- 1. Carga la configuración de Firebase -->
+    <script src="js/config.js"></script>
+    <!-- 2. Inicializa Firebase -->
+    <script type="module" src="js/firebase-init.js"></script>
+    <!-- 3. Ejecuta la lógica de la página de detalle -->
+    <script defer src="js/detalle.js"></script>
 
 </body>
 </html>
