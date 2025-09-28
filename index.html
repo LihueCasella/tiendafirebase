@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MegaStore | Tecnología, Moda y Hogar</title>
-    <!-- Aquí enlazarás tu archivo CSS -->
     <link rel="stylesheet" href="assets/main.css">
-    <!-- Opcional: Iconos de Font Awesome para el carrito/búsqueda -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"> -->
 </head>
 <body>
 
@@ -47,20 +44,18 @@
     <main class="container">
         <h2 class="section-title">Nuestros productos destacados</h2>
 
-        <!-- Navegación de pestañas (similar al ejemplo) -->
         <div class="category-tabs">
             <button class="tab-btn active">Tecnología</button>
             <button class="tab-btn">Indumentaria</button>
             <button class="tab-btn">Hogar</button>
         </div>
         
-        <!-- Contenedor de la Grilla de Productos (se llenará con JS) -->
         <div class="product-grid">
             <!-- Las tarjetas de producto se generarán aquí con JavaScript -->
         </div> 
     </main>
 
-    <!-- 4. FOOTER (Información Legal y Contacto) -->
+    <!-- 4. FOOTER -->
     <footer class="footer">
         <div class="footer-content">
             <p>&copy; 2025 MegaStore. Todos los derechos reservados a Lihue Casella.</p>
@@ -72,72 +67,13 @@
         </div>
     </footer>
 
-    <!-- 5. SCRIPTS DE FIREBASE Y CONFIGURACIÓN (CONEXIÓN AUTOMÁTICA) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, setDoc, doc, onSnapshot, collection, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-lite.js";
-        
-        // Configuraciones globales proporcionadas por el entorno
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        // Inicialización de Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        
-        // Debugging
-        setLogLevel('debug');
-        
-        // Autenticación
-        async function authenticate() {
-            try {
-                if (authToken) {
-                    await signInWithCustomToken(auth, authToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Error durante la autenticación:", error);
-            }
-        }
-        
-        authenticate();
-
-        // Exponer variables globales para que app.js pueda usarlas (menos ideal, pero funciona)
-        window.db = db;
-        window.auth = auth;
-        window.getAuth = getAuth;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.getFirestore = getFirestore;
-        window.collection = collection;
-        window.query = query;
-        window.onSnapshot = onSnapshot;
-        window.doc = doc;
-        window.setDoc = setDoc;
-        
-        onAuthStateChanged(auth, (user) => {
-            const authStatus = document.getElementById('auth-status');
-            if (user) {
-                authStatus.textContent = `UID: ${user.uid.substring(0, 8)}...`;
-                console.log("Usuario autenticado. UID:", user.uid);
-            } else {
-                authStatus.textContent = 'Ingresar';
-                console.log("Usuario no autenticado (Anónimo o Error)");
-            }
-        });
-
-        // Cargar app.js (ya que ahora usamos módulos, el orden de carga es diferente)
-        // Podrías poner la lógica de app.js aquí, o cargarlo después de que el DOM esté listo
-        // Por simplicidad y para mantener el archivo app.js separado, lo cargamos aquí.
-        const script = document.createElement('script');
-        script.src = 'js/app.js';
-        document.body.appendChild(script);
-
-    </script>
-
-    <!-- 6. El script app.js ahora se carga dinámicamente o debe usar la sintaxis de módulo si desea importaciones -->
+    <!-- 5. SCRIPTS (CARGA EN ORDEN) -->
+    <!-- Carga la configuración de Firebase -->
+    <script src="js/config.js"></script>
+    <!-- Inicializa Firebase (es un módulo) -->
+    <script type="module" src="js/firebase-init.js"></script>
+    <!-- Carga la lógica de la aplicación (con 'defer' para garantizar el orden) -->
+    <script defer src="js/app.js"></script>
+    
 </body>
 </html>
