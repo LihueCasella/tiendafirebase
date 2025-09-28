@@ -1,39 +1,31 @@
-// js/app.js (CORREGIDO)
+// js/app.js (CORREGIDO Y FINAL)
 
-// Espera al evento 'firebase-ready' para iniciar la lógica de la aplicación.
-// Esto asegura que todas las funciones de Firebase estén cargadas y listas.
 document.addEventListener('firebase-ready', () => {
     initializeApp();
 });
 
-// Función principal de inicialización
 function initializeApp() {
 
-    // 1. SELECCIÓN DE ELEMENTOS DEL DOM
     const productGrid = document.querySelector('.product-grid');
     const tabButtons = document.querySelectorAll('.tab-btn');
     const cartIcon = document.querySelector('.cart-icon');
 
-    // Si no estamos en la página de inicio (no hay productGrid), solo actualizamos el carrito y salimos.
     if (!productGrid) {
         updateCartCount();
         return;
     }
 
-    // 2. REFERENCIAS DE FIRESTORE (desde la ventana global)
     const { db, collection, query, where, getDocs, limit, doc, getDoc } = window;
     const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     const PRODUCTS_COLLECTION_PATH = `/artifacts/${APP_ID}/public/data/productos`;
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION_PATH);
 
-    // 3. FUNCIONES DE DATOS (FIRESTORE)
-    async function fetchProducts(category, count = 2) {
+    async function fetchProducts(category, count = 4) { // Aumentamos a 4 para que se vea mejor
         if (!category) return;
         
-        productGrid.innerHTML = '<p>Cargando productos...</p>';
+        productGrid.innerHTML = '<p style="text-align: center; padding: 20px;">Cargando...</p>';
 
         try {
-            // Esta consulta ahora funciona porque `limit` y `getDocs` están disponibles
             const q = query(productsCollectionRef, where("categoria", "==", category), limit(count));
             const querySnapshot = await getDocs(q);
 
@@ -46,7 +38,7 @@ function initializeApp() {
 
         } catch (error) {
             console.error("Error fetching products:", error);
-            productGrid.innerHTML = `<p>Error al cargar productos. Intente de nuevo.</p>`;
+            productGrid.innerHTML = `<p style="text-align: center; color: red; padding: 20px;">Error al cargar productos.</p>`;
         }
     }
 
@@ -54,37 +46,30 @@ function initializeApp() {
         try {
             const docRef = doc(db, PRODUCTS_COLLECTION_PATH, productId);
             const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                return { id: docSnap.id, ...docSnap.data() };
-            } else {
-                console.log("No such product!");
-                return null;
-            }
+            return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
         } catch (error) {
             console.error("Error fetching product by ID:", error);
             return null;
         }
     }
 
-    // 4. FUNCIONES DE RENDERING
     function renderProducts(productsToRender) {
-        productGrid.innerHTML = ''; // Limpia la grilla
+        productGrid.innerHTML = '';
 
         if (productsToRender.length === 0) {
-            productGrid.innerHTML = '<p>No hay productos disponibles en esta categoría.</p>';
+            productGrid.innerHTML = '<p style="text-align: center; padding: 20px;">No hay productos destacados para esta categoría.</p>';
             return;
         }
 
         productsToRender.forEach(product => {
             const cardHTML = `
                 <a href="detalle.html?id=${product.id}" class="product-card-link">
-                    <article class="product-card" data-id="${product.id}" data-category="${product.categoria}">
-                        <img src="${product.image}" alt="${product.nombre}" onerror="this.src='https://placehold.co/300x300/ccc/ffffff?text=Imagen no disponible';">
+                    <article class="product-card" data-id="${product.id}">
+                        <img src="${product.image}" alt="${product.nombre}" onerror="this.src='https://placehold.co/300x300/eee/aaa?text=Error';">
                         <div class="product-info">
                             <p class="product-name">${product.nombre}</p>
                             <p class="product-price">$${(product.precio || 0).toLocaleString('es-AR')}</p>
-                            <button class="btn btn-small add-to-cart" data-id="${product.id}">Añadir al Carrito</button>
+                            <button class="btn btn-small add-to-cart" data-id="${product.id}">Añadir</button>
                         </div>
                     </article>
                 </a>
@@ -96,30 +81,24 @@ function initializeApp() {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                const productId = e.target.dataset.id;
-                addToCart(productId);
+                addToCart(e.target.dataset.id);
             });
         });
     }
 
-    // 5. MANEJO DE PESTAÑAS
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
-            const newCategory = button.textContent.trim().toLowerCase();
+            // SOLUCIÓN: Normalizar el texto para quitar tildes.
+            const newCategory = button.textContent.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             
             tabButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
 
-            fetchProducts(newCategory, 2);
+            fetchProducts(newCategory);
         });
     });
 
-    // 6. LÓGICA DEL CARRITO (localStorage)
-    const getCart = () => {
-        const cart = localStorage.getItem('cart');
-        return cart ? JSON.parse(cart) : [];
-    }
-
+    const getCart = () => JSON.parse(localStorage.getItem('cart')) || [];
     const saveCart = (cart) => {
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartCount();
@@ -130,30 +109,24 @@ function initializeApp() {
         const productExists = cart.find(item => item.id === productId);
 
         if (productExists) {
-            productExists.quantity += 1;
-            saveCart(cart);
-            alert(`Se añadió otra unidad de ${productExists.name}`);
+            productExists.quantity++;
         } else {
             const productData = await getProductById(productId);
             if (productData) {
                 cart.push({ id: productId, quantity: 1, name: productData.nombre, price: productData.precio });
-                saveCart(cart);
-                alert(`Producto añadido: ${productData.nombre}`);
-            } else {
-                alert('No se pudo añadir el producto. No se encontró.');
             }
         }
+        saveCart(cart);
+        alert('Producto añadido/actualizado en el carrito.');
     }
 
     function updateCartCount() {
         if (!cartIcon) return;
-        const cart = getCart();
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const totalItems = getCart().reduce((sum, item) => sum + item.quantity, 0);
         cartIcon.textContent = `🛒 Carrito (${totalItems})`;
     }
 
-    // 7. INICIALIZACIÓN DE LA LÓGICA DE LA PÁGINA
-    // Carga inicial de productos de tecnología
-    fetchProducts('tecnologia', 2);
+    // Carga inicial
+    fetchProducts('tecnologia');
     updateCartCount();
 }
