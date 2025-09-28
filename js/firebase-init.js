@@ -1,18 +1,17 @@
-// js/firebase-init.js (CORREGIDO OTRA VEZ)
+// js/firebase-init.js (CORRECCIÓN FINAL)
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, limit, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// Añadimos onSnapshot a la lista de importaciones
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, limit, runTransaction, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 function initializeFirebase() {
-    // CORRECCIÓN: Usar la variable correcta `__firebase_config` que viene de config.js
     if (typeof window.__firebase_config === 'undefined') {
         console.error("La configuración de Firebase (__firebase_config) no se encontró. Asegúrate de que js/config.js se cargue primero.");
         return;
     }
 
     try {
-        // Usa la configuración correcta
         const app = initializeApp(window.__firebase_config);
         const db = getFirestore(app);
         const auth = getAuth(app);
@@ -28,6 +27,7 @@ function initializeFirebase() {
         window.getDocs = getDocs;
         window.limit = limit;
         window.runTransaction = runTransaction;
+        window.onSnapshot = onSnapshot; // <-- AÑADIMOS LA FUNCIÓN QUE FALTABA
 
         signInAnonymously(auth).catch(e => console.error("Error de autenticación anónima:", e));
         
