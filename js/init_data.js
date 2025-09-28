@@ -1,51 +1,15 @@
-// js/init_data.js (Versión que usa variables globales de Firebase)
+// js/init_data.js (Simplificado: Sin inicialización de productos)
 
-import { startFeaturedProducts } from './app.js';
+// La importación de startFeaturedProducts ya no es necesaria.
+// import { startFeaturedProducts } from './app.js';
 
-// Esperamos al evento personalizado que indica que Firebase está listo.
+// El evento de 'firebase-ready' se sigue escuchando por si se necesita en el futuro,
+// pero la función que se ejecuta ahora está vacía.
 document.addEventListener('firebase-ready', () => {
 
-    console.log("Evento 'firebase-ready' recibido. Iniciando la lógica de la aplicación...");
+    console.log("Evento 'firebase-ready' recibido, pero la inicialización de productos destacados ha sido desactivada.");
 
-    // Las funciones de Firebase como collection, getDocs, addDoc ahora están en `window`
-    const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const PRODUCTS_COLLECTION_PATH = `/artifacts/${APP_ID}/public/data/productos`;
-    const productsCollectionRef = collection(db, PRODUCTS_COLLECTION_PATH);
+    // La función main() que poblaba la base de datos ha sido eliminada.
+    // La llamada a startFeaturedProducts() ha sido eliminada.
 
-    const initialProducts = [
-        { nombre: "Smartphone Nova 10", categoria: "tecnologia", precio: 599.99, image: "https://placehold.co/300x300/1e40af/ffffff?text=Smartphone" },
-        { nombre: "Auriculares Bluetooth P3", categoria: "tecnologia", precio: 79.50, image: "https://placehold.co/300x300/10b981/ffffff?text=Auriculares" },
-        { nombre: "Monitor Curvo 27' Pro", categoria: "tecnologia", precio: 349.00, image: "https://placehold.co/300x300/f59e0b/ffffff?text=Monitor" },
-        { nombre: "Jeans Slim Fit Clásicos", categoria: "indumentaria", precio: 45.99, image: "https://placehold.co/300x300/ef4444/ffffff?text=Jeans" },
-        { nombre: "Chaqueta de Invierno Alpina", categoria: "indumentaria", precio: 129.99, image: "https://placehold.co/300x300/a855f7/ffffff?text=Chaqueta" },
-        { nombre: "Camiseta Deportiva DRI-FIT", categoria: "indumentaria", precio: 25.00, image: "https://placehold.co/300x300/06b6d4/ffffff?text=Camiseta" },
-        { nombre: "Cafetera Expresso Automática", categoria: "hogar", precio: 199.90, image: "https://placehold.co/300x300/fbbf24/333?text=Cafetera" },
-        { nombre: "Juego de Sábanas de Lino", categoria: "hogar", precio: 85.00, image: "https://placehold.co/300x300/16a34a/ffffff?text=Sabanas" },
-        { nombre: "Aspiradora Robótica Smart", categoria: "hogar", precio: 250.50, image: "https://placehold.co/300x300/4f46e5/ffffff?text=Aspiradora" },
-        { nombre: "Lámpara de Escritorio LED", categoria: "hogar", precio: 40.00, image: "https://placehold.co/300x300/f97316/ffffff?text=Lampara" }
-    ];
-
-    async function main() {
-        try {
-            const snapshot = await getDocs(productsCollectionRef);
-            if (snapshot.size === 0) {
-                console.log(`Iniciando la inserción de ${initialProducts.length} productos...`);
-                for (const product of initialProducts) {
-                    await addDoc(productsCollectionRef, product);
-                }
-                console.log("¡Productos de prueba insertados con éxito!");
-            }
-            
-            // Llamamos a la función que renderiza los productos.
-            startFeaturedProducts();
-
-        } catch (error) {
-            console.error("Error en el script de inicialización (main):", error);
-            // Si hay un error, al menos intentamos renderizar los productos que ya existan.
-            startFeaturedProducts();
-        }
-    }
-
-    // Ejecutar la función principal.
-    main();
 });
