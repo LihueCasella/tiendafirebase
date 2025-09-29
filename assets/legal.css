@@ -1,0 +1,68 @@
+/* assets/legal.css */
+
+/* Contenedor principal para las páginas de Términos y Privacidad */
+.legal-content {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+/* Título principal de la página */
+.legal-content h2 {
+    font-size: 2.5rem;
+    color: #264653; /* Un azul oscuro, profesional */
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+}
+
+/* Subtítulos dentro del contenido */
+.legal-content h3 {
+    font-size: 1.8rem;
+    color: #2a9d8f; /* Un verde azulado para destacar secciones */
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+/* Estilo general de los párrafos */
+.legal-content p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* Estilo para las listas */
+.legal-content ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.legal-content li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/* Estilo para texto en negrita, como la fecha de actualización */
+.legal-content strong {
+    color: #2c3e50;
+}
+
+/* Media query para mejorar la legibilidad en pantallas pequeñas */
+@media (max-width: 768px) {
+    .legal-content {
+        padding: 20px;
+    }
+
+    .legal-content h2 {
+        font-size: 2rem;
+    }
+
+    .legal-content h3 {
+        font-size: 1.5rem;
+    }
+}
