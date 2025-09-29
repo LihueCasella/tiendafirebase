@@ -1,5 +1,19 @@
 // js/detalle.js (Versión Definitiva)
 
+// --- MAPA DE IMÁGENES DE PRODUCTOS (CORREGIDO) ---
+const productImageMap = {
+    "Smartphone Nova 10": "https://images.pexels.com/photos/1092644/pexels-photo-1092644.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Auriculares Bluetooth P3": "https://images.pexels.com/photos/3587478/pexels-photo-3587478.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Monitor Curvo 27' Pro": "https://images.pexels.com/photos/1779487/pexels-photo-1779487.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Jeans Slim Fit Clásicos": "https://images.pexels.com/photos/4210866/pexels-photo-4210866.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Chaqueta de Invierno Alpina": "https://images.pexels.com/photos/5211446/pexels-photo-5211446.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Camiseta Deportiva DRI-FIT": "https://images.pexels.com/photos/991509/pexels-photo-991509.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Cafetera Expresso Automática": "https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Juego de Sábanas de Lino": "https://images.pexels.com/photos/279746/pexels-photo-279746.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Aspiradora Robótica Smart": "https://images.pexels.com/photos/4009409/pexels-photo-4009409.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Lámpara de Escritorio LED": "https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+};
+
 // ----------------------------------------------------
 // 1. DEFINICIÓN DE FUNCIONES PRINCIPALES
 // ----------------------------------------------------
@@ -56,7 +70,7 @@ async function loadProductDetails() {
 // Función para pintar la información del producto en el DOM
 function renderProduct(product) {
     document.getElementById('page-title').textContent = `${product.nombre} | MegaStore`;
-    document.getElementById('detail-main-image').src = product.image || 'https://placehold.co/500x400/eeeeee/333333?text=Sin+Imagen';
+    document.getElementById('detail-main-image').src = productImageMap[product.nombre] || product.image || 'https://placehold.co/500x400/eeeeee/333333?text=Sin+Imagen';
     document.getElementById('detail-main-image').alt = product.nombre;
     document.getElementById('detail-name').textContent = product.nombre;
     document.getElementById('detail-brand').textContent = product.marca ? `Marca: ${product.marca}` : 'Marca no disponible';
