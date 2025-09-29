@@ -17,29 +17,26 @@
 <body>
 
     <!-- Header -->
-    <header>
-        <div class="header">
-            <div class="logo">
-                <a href="index.html" style="text-decoration: none; color: inherit;"><h1>MegaStore</h1></a>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Buscar productos, marcas...">
-                <button><i class="fas fa-search"></i></button>
-            </div>
-            <nav class="user-nav">
-                <p id="auth-status" style="color: white; margin-right: 15px;">Conectando...</p>
-                <a href="#" class="nav-item"><i class="fas fa-user"></i> Mi Cuenta</a>
-                <a href="carrito.html" class="nav-item cart-icon">🛒 Carrito</a>
-            </nav>
+    <header class="header">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none; color: inherit;"><h1>MegaStore</h1></a>
         </div>
-        <nav class="main-menu">
-            <a href="productos.html?cat=all" class="menu-item" data-category="all">Todos</a>
-            <a href="productos.html?cat=tecnologia" class="menu-item" data-category="tecnologia">Tecnología</a>
-            <a href="productos.html?cat=indumentaria" class="menu-item" data-category="indumentaria">Indumentaria</a>
-            <a href="productos.html?cat=hogar" class="menu-item" data-category="hogar">Hogar</a>
-            <a href="#" class="menu-item" data-category="otros">Otros</a>
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar productos...">
+            <button aria-label="Buscar"><i class="fas fa-search"></i></button>
+        </div>
+        <nav class="user-nav">
+            <a href="#" id="auth-status" class="nav-item">Conectando...</a>
+            <a href="carrito.html" class="nav-item cart-icon">🛒 Carrito</a>
         </nav>
     </header>
+
+    <nav class="main-menu">
+        <a href="productos.html?cat=all" class="menu-item" data-category="all">Todos</a>
+        <a href="productos.html?cat=tecnologia" class="menu-item" data-category="tecnologia">Tecnología</a>
+        <a href="productos.html?cat=indumentaria" class="menu-item" data-category="indumentaria">Indumentaria</a>
+        <a href="productos.html?cat=hogar" class="menu-item" data-category="hogar">Hogar</a>
+    </nav>
 
     <!-- Contenido Principal -->
     <div class="container">
