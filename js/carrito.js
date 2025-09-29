@@ -1,6 +1,21 @@
 // js/carrito.js
 // Lógica para la página del carrito de compras usando LocalStorage.
 
+// --- MAPA DE IMÁGENES DE PRODUCTOS (AÑADIDO PARA EL CARRITO) ---
+const productImageMap = {
+    "Smartphone Nova 10": "https://images.pexels.com/photos/1092644/pexels-photo-1092644.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Auriculares Bluetooth P3": "https://images.pexels.com/photos/3587478/pexels-photo-3587478.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Monitor Curvo 27' Pro": "https://images.pexels.com/photos/1779487/pexels-photo-1779487.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Jeans Slim Fit Clásicos": "https://images.pexels.com/photos/4210866/pexels-photo-4210866.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Chaqueta de Invierno Alpina": "https://http2.mlstatic.com/D_NQ_NP_643636-MLA50547416228_072022-O.webp",
+    "Camiseta Deportiva DRI-FIT": "https://images.pexels.com/photos/991509/pexels-photo-991509.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Cafetera Expresso Automática": "https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Juego de Sábanas de Lino": "https://images.pexels.com/photos/279746/pexels-photo-279746.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Aspiradora Robótica Smart": "https://www.lanacion.com.ar/resizer/v2/las-aspiradoras-robots-son-furor-hoy-en-OHHXPJQJB5ANRC7JXTZUF7SNPQ.jpg?auth=8cc3cfe13367ebccd3f577ac486c28c5ecb26c49dab5db81c961064ba30db876&width=880&height=586&quality=70&smart=true",
+    "Lámpara de Escritorio LED": "https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+};
+
+
 // ----------------------------------------------------
 // 1. VARIABLES GLOBALES Y DOM
 // ----------------------------------------------------
@@ -77,7 +92,8 @@ function renderCart() {
         subtotal += itemTotal;
 
         const formattedPrice = (item.precio || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-        const imageSrc = item.image || `https://placehold.co/80x80/eee/333?text=${item.nombre.substring(0,1)}`;
+        // --- LÍNEA MODIFICADA ---
+        const imageSrc = productImageMap[item.nombre] || item.image || `https://placehold.co/80x80/eee/333?text=${item.nombre.substring(0,1)}`;
 
         cartHTML += `
             <li class="cart-item" data-id="${item.id}">
