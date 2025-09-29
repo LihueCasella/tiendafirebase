@@ -75,7 +75,7 @@ function initProductPage() {
     }
 
     // ----------------------------------------------------
-    // LÓGICA DE CARRITO (LOCALSTORAGE)
+    // LÓGICA DE CARRITO (CON NUEVA NOTIFICACIÓN)
     // ----------------------------------------------------
 
     const getCart = () => {
@@ -105,13 +105,16 @@ function initProductPage() {
 
         saveCart(cart);
 
-        alert(`'${product.nombre}' fue añadido al carrito.`);
+        // --- Notificación visual mejorada ---
         buttonEl.disabled = true;
-        buttonEl.textContent = "¡Añadido!";
+        buttonEl.classList.add('added');
+        buttonEl.textContent = 'Añadido';
+
         setTimeout(() => {
             buttonEl.disabled = false;
+            buttonEl.classList.remove('added');
             buttonEl.textContent = "Añadir al Carrito";
-        }, 1500);
+        }, 2000); // 2 segundos de confirmación
     }
 
     // ----------------------------------------------------

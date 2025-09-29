@@ -83,7 +83,7 @@ function renderProduct(product) {
 }
 
 // ----------------------------------------------------
-// 2. LÓGICA DEL CARRITO Y EVENTOS
+// 2. LÓGICA DEL CARRITO Y EVENTOS (CON NUEVA NOTIFICACIÓN)
 // ----------------------------------------------------
 
 function setupActionButtons() {
@@ -95,7 +95,7 @@ function setupActionButtons() {
     if (addToCartBtn) {
         addToCartBtn.addEventListener('click', () => {
             if (!currentProductData) {
-                alert("Error: Los datos del producto no están cargados.");
+                displayError("Error: Los datos del producto no están cargados.");
                 return;
             }
             const quantity = parseInt(qtyInput.value) || 1;
@@ -107,7 +107,17 @@ function setupActionButtons() {
                 cart.push({ ...currentProductData, cantidad: quantity });
             }
             localStorage.setItem('cart', JSON.stringify(cart));
-            alert(`Añadido al carrito: ${quantity} x ${currentProductData.nombre}`);
+            
+            // --- Notificación visual mejorada ---
+            addToCartBtn.disabled = true;
+            addToCartBtn.classList.add('added');
+            addToCartBtn.textContent = 'Añadido';
+
+            setTimeout(() => {
+                addToCartBtn.disabled = false;
+                addToCartBtn.classList.remove('added');
+                addToCartBtn.textContent = "Añadir al Carrito";
+            }, 2000); // 2 segundos
         });
     }
     
@@ -120,7 +130,6 @@ function setupActionButtons() {
         if (current > 1) qtyInput.value = current - 1;
     });
 }
-
 
 // ----------------------------------------------------
 // 3. PUNTO DE ENTRADA (CON LÓGICA ANTI-RACE-CONDITION)

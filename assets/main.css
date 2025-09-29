@@ -447,3 +447,17 @@ a {
     margin: 0;
     font-size: 1.2em;
 }
+
+/* --- ESTILOS PARA NOTIFICACIÓN 'AÑADIDO AL CARRITO' --- */
+.btn.added {
+    background-color: #28a745 !important; /* Verde de éxito, con !important para sobreescribir */
+    color: white !important;
+    border-color: #28a745 !important;
+    cursor: default;
+}
+
+.btn.added::before {
+    content: '✓ '; /* Tilde de confirmación */
+    font-weight: bold;
+    margin-right: 4px;
+}
