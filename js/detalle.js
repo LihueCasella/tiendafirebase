@@ -1,16 +1,16 @@
 // js/detalle.js (Versión Definitiva)
 
-// --- MAPA DE IMÁGENES DE PRODUCTOS (CORREGIDO) ---
+// --- MAPA DE IMÁGENES DE PRODUCTOS (CORREGIDO Y VERIFICADO) ---
 const productImageMap = {
     "Smartphone Nova 10": "https://images.pexels.com/photos/1092644/pexels-photo-1092644.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     "Auriculares Bluetooth P3": "https://images.pexels.com/photos/3587478/pexels-photo-3587478.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     "Monitor Curvo 27' Pro": "https://images.pexels.com/photos/1779487/pexels-photo-1779487.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     "Jeans Slim Fit Clásicos": "https://images.pexels.com/photos/4210866/pexels-photo-4210866.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    "Chaqueta de Invierno Alpina": "https://images.pexels.com/photos/5211446/pexels-photo-5211446.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Chaqueta de Invierno Alpina": "https://http2.mlstatic.com/D_NQ_NP_643636-MLA50547416228_072022-O.webp",
     "Camiseta Deportiva DRI-FIT": "https://images.pexels.com/photos/991509/pexels-photo-991509.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     "Cafetera Expresso Automática": "https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     "Juego de Sábanas de Lino": "https://images.pexels.com/photos/279746/pexels-photo-279746.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    "Aspiradora Robótica Smart": "https://images.pexels.com/photos/4009409/pexels-photo-4009409.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    "Aspiradora Robótica Smart": "https://www.lanacion.com.ar/resizer/v2/las-aspiradoras-robots-son-furor-hoy-en-OHHXPJQJB5ANRC7JXTZUF7SNPQ.jpg?auth=8cc3cfe13367ebccd3f577ac486c28c5ecb26c49dab5db81c961064ba30db876&width=880&height=586&quality=70&smart=true",
     "Lámpara de Escritorio LED": "https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
 };
 
