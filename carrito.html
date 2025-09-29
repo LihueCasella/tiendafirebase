@@ -212,7 +212,19 @@
         </div>
     </footer>
 
-    <!-- 4. SCRIPTS GLOBALES -->
+    <!-- 4. MODAL DE CONFIRMACIÓN PERSONALIZADO -->
+    <div id="custom-confirm-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="confirm-modal-title">Confirmar Acción</h3>
+            <p id="confirm-modal-text">¿Estás seguro?</p>
+            <div class="modal-buttons">
+                <button id="confirm-modal-cancel" class="btn btn-secondary">Cancelar</button>
+                <button id="confirm-modal-accept" class="btn btn-danger">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. SCRIPTS GLOBALES -->
     <script type="module">
         // Este script es solo para la autenticación y no interfiere con la lógica del carrito local
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -231,7 +243,7 @@
         });
     </script>
     
-    <!-- 5. Script Específico de la Página del Carrito -->
+    <!-- 6. Script Específico de la Página del Carrito -->
     <script src="js/carrito.js"></script>
 
 </body>

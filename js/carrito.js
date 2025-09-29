@@ -26,11 +26,48 @@ const DOMElements = {
     emptyCartView: document.getElementById('empty-cart-view'),
     cartSummary: document.getElementById('cart-summary'),
     cartSubtotal: document.getElementById('cart-subtotal'),
-    cartTotal: document.getElementById('cart-total') 
+    cartTotal: document.getElementById('cart-total'),
+    // --- Elementos del Modal ---
+    modal: document.getElementById('custom-confirm-modal'),
+    modalTitle: document.getElementById('confirm-modal-title'),
+    modalText: document.getElementById('confirm-modal-text'),
+    modalAcceptBtn: document.getElementById('confirm-modal-accept'),
+    modalCancelBtn: document.getElementById('confirm-modal-cancel')
 };
 
 // ----------------------------------------------------
-// 2. LÓGICA DEL CARRITO (LOCALSTORAGE)
+// 2. LÓGICA DEL MODAL DE CONFIRMACIÓN
+// ----------------------------------------------------
+
+function showCustomConfirm(title, text) {
+    return new Promise((resolve) => {
+        DOMElements.modalTitle.textContent = title;
+        DOMElements.modalText.textContent = text;
+        DOMElements.modal.classList.remove('hidden');
+
+        // Limpiar listeners antiguos para evitar ejecuciones múltiples
+        const newAcceptBtn = DOMElements.modalAcceptBtn.cloneNode(true);
+        DOMElements.modalAcceptBtn.parentNode.replaceChild(newAcceptBtn, DOMElements.modalAcceptBtn);
+        DOMElements.modalAcceptBtn = newAcceptBtn;
+
+        const newCancelBtn = DOMElements.modalCancelBtn.cloneNode(true);
+        DOMElements.modalCancelBtn.parentNode.replaceChild(newCancelBtn, DOMElements.modalCancelBtn);
+        DOMElements.modalCancelBtn = newCancelBtn;
+
+        // Añadir nuevos listeners
+        DOMElements.modalAcceptBtn.onclick = () => {
+            DOMElements.modal.classList.add('hidden');
+            resolve(true);
+        };
+        DOMElements.modalCancelBtn.onclick = () => {
+            DOMElements.modal.classList.add('hidden');
+            resolve(false);
+        };
+    });
+}
+
+// ----------------------------------------------------
+// 3. LÓGICA DEL CARRITO (LOCALSTORAGE)
 // ----------------------------------------------------
 
 const getCart = () => {
@@ -51,37 +88,41 @@ const saveCart = (cart) => {
     }
 };
 
-function removeItem(productId) {
+async function removeItem(productId) {
     let cart = getCart();
     const productToRemove = cart.find(item => item.id === productId);
     
-    if (productToRemove && confirm(`¿Estás seguro de que quieres eliminar "${productToRemove.nombre}" del carrito?`)) {
-        cart = cart.filter(item => item.id !== productId);
-        saveCart(cart);
-        renderCart(); // Volver a renderizar para mostrar los cambios
+    if (productToRemove) {
+        const confirmed = await showCustomConfirm(
+            'Eliminar Producto',
+            `¿Estás seguro de que quieres eliminar "${productToRemove.nombre}" del carrito?`
+        );
+
+        if (confirmed) {
+            cart = cart.filter(item => item.id !== productId);
+            saveCart(cart);
+            renderCart(); // Volver a renderizar para mostrar los cambios
+        }
     }
 }
 
 // ----------------------------------------------------
-// 3. RENDERIZADO Y EVENTOS DEL DOM
+// 4. RENDERIZADO Y EVENTOS DEL DOM
 // ----------------------------------------------------
 
 function renderCart() {
     const cart = getCart();
     let subtotal = 0;
 
-    // Ocultar mensaje de carga y mostrar la vista correcta
     if (DOMElements.loadingMessage) DOMElements.loadingMessage.classList.add('hidden');
 
     if (cart.length === 0) {
-        // Carrito vacío
         if (DOMElements.emptyCartView) DOMElements.emptyCartView.classList.remove('hidden');
         if (DOMElements.cartSummary) DOMElements.cartSummary.classList.add('hidden');
         if (DOMElements.cartContent) DOMElements.cartContent.innerHTML = '';
         return;
     }
 
-    // Carrito con ítems
     if (DOMElements.emptyCartView) DOMElements.emptyCartView.classList.add('hidden');
     if (DOMElements.cartSummary) DOMElements.cartSummary.classList.remove('hidden');
 
@@ -92,7 +133,6 @@ function renderCart() {
         subtotal += itemTotal;
 
         const formattedPrice = (item.precio || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-        // --- LÍNEA MODIFICADA ---
         const imageSrc = productImageMap[item.nombre] || item.image || `https://placehold.co/80x80/eee/333?text=${item.nombre.substring(0,1)}`;
 
         cartHTML += `
@@ -116,17 +156,15 @@ function renderCart() {
     cartHTML += '</ul>';
     if (DOMElements.cartContent) DOMElements.cartContent.innerHTML = cartHTML;
 
-    // Actualizar Resumen
     const formattedSubtotal = subtotal.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
     if (DOMElements.cartSubtotal) DOMElements.cartSubtotal.textContent = formattedSubtotal;
-    if (DOMElements.cartTotal) DOMElements.cartTotal.textContent = formattedSubtotal; // Total = Subtotal por ahora
+    if (DOMElements.cartTotal) DOMElements.cartTotal.textContent = formattedSubtotal; 
 }
 
 function setupEventListeners() {
     if (!DOMElements.cartContent) return;
 
     DOMElements.cartContent.addEventListener('click', (e) => {
-        // Delegación de eventos para el botón de quitar
         if (e.target.classList.contains('remove-btn')) {
             const productId = e.target.getAttribute('data-id');
             if (productId) {
@@ -137,7 +175,7 @@ function setupEventListeners() {
 }
 
 // ----------------------------------------------------
-// 4. INICIALIZACIÓN
+// 5. INICIALIZACIÓN
 // ----------------------------------------------------
 
 function initCartPage() {
@@ -145,5 +183,4 @@ function initCartPage() {
     setupEventListeners();
 }
 
-// Asegurarnos que el DOM esté listo antes de ejecutar
 document.addEventListener('DOMContentLoaded', initCartPage);
