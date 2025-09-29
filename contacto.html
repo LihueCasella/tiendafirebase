@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto | MegaStore</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="assets/contacto.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none; color: inherit;"><h1>MegaStore</h1></a>
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar productos...">
+            <button aria-label="Buscar"><i class="fas fa-search"></i></button>
+        </div>
+        <nav class="user-nav">
+            <a href="#" id="auth-status" class="nav-item">Conectando...</a>
+            <a href="carrito.html" class="nav-item cart-icon">🛒 Carrito</a>
+        </nav>
+    </header>
+
+    <nav class="main-menu">
+        <a href="index.html" class="menu-item">Inicio</a>
+        <a href="productos.html?cat=tecnologia" class="menu-item">Tecnología</a>
+        <a href="productos.html?cat=indumentaria" class="menu-item">Indumentaria</a>
+        <a href="productos.html?cat=hogar" class="menu-item">Hogar</a>
+        <a href="contacto.html" class="menu-item">Contacto</a>
+    </nav>
+
+    <main class="container">
+        <section class="contact-header">
+            <h2>Conecta con Nosotros</h2>
+            <p>Estamos disponibles en nuestras redes sociales y canales de contacto.</p>
+        </section>
+
+        <section class="contact-grid">
+            <a href="https://instagram.com" target="_blank" class="contact-card instagram">
+                <i class="fab fa-instagram"></i>
+                <h3>Instagram</h3>
+                <p>Síguenos para ver novedades y ofertas especiales.</p>
+            </a>
+            <a href="https://linkedin.com" target="_blank" class="contact-card linkedin">
+                <i class="fab fa-linkedin-in"></i>
+                <h3>LinkedIn</h3>
+                <p>Conecta con nuestro perfil profesional.</p>
+            </a>
+            <a href="https://wa.me/1234567890" target="_blank" class="contact-card whatsapp">
+                <i class="fab fa-whatsapp"></i>
+                <h3>WhatsApp</h3>
+                <p>Chatea con nosotros para un soporte rápido.</p>
+            </a>
+            <a href="https://github.com" target="_blank" class="contact-card github">
+                <i class="fab fa-github"></i>
+                <h3>GitHub</h3>
+                <p>Explora nuestros proyectos y colabora.</p>
+            </a>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 MegaStore. Todos los derechos reservados a Lihue Casella.</p>
+            <nav class="footer-links">
+                <a href="#">Términos y Condiciones</a> | 
+                <a href="#">Política de Privacidad</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script type="module" src="js/firebase-init.js"></script> 
+
+</body>
+</html>

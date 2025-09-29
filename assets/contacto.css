@@ -1,0 +1,79 @@
+
+/* Estilos para la página de Contacto */
+
+.contact-header {
+    text-align: center;
+    padding: 30px 0;
+    margin-bottom: 30px;
+}
+
+.contact-header h2 {
+    font-size: 2.8rem;
+    color: var(--color-dark);
+    margin-bottom: 10px;
+}
+
+.contact-header p {
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    padding: 20px 0;
+}
+
+.contact-card {
+    background-color: #fff;
+    border-radius: var(--border-radius, 8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 30px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--color-text, #333);
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+.contact-card i {
+    font-size: 3.5rem; /* Iconos más grandes */
+    margin-bottom: 20px;
+    transition: color 0.3s;
+}
+
+.contact-card h3 {
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+}
+
+.contact-card p {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #555;
+}
+
+/* Colores específicos para cada red social */
+.contact-card.instagram:hover i { color: #E1306C; }
+.contact-card.linkedin:hover i { color: #0A66C2; }
+.contact-card.whatsapp:hover i { color: #25D366; }
+.contact-card.github:hover i { color: #181717; }
+
+/* Adaptación para dispositivos móviles */
+@media (max-width: 768px) {
+    .contact-header h2 {
+        font-size: 2.2rem;
+    }
+    .contact-grid {
+        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+    }
+}
