@@ -13,6 +13,20 @@ function initProductPage() {
     const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     const PRODUCTS_COLLECTION_PATH = `/artifacts/${APP_ID}/public/data/productos`;
 
+    // --- MAPA DE IMÁGENES DE PRODUCTOS ---
+    const productImageMap = {
+        "Smartphone Nova 10": "https://images.pexels.com/photos/1092644/pexels-photo-1092644.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "Auriculares Bluetooth P3": "https://images.pexels.com/photos/3587478/pexels-photo-3587478.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "Monitor Curvo 27' Pro": "https://images.pexels.com/photos/1779487/pexels-photo-1779487.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "Jeans Slim Fit Clásicos": "https://images.pexels.com/photos/4210866/pexels-photo-4210866.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "Chaqueta de Invierno Alpina": "https://images.pexels.com/photos/981570/pexels-photo-981570.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "Camiseta Deportiva DRI-FIT": "https://images.pexels.com/photos/991509/pexels-photo-991509.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "Cafetera Expresso Automática": "https://images.pexels.com/photos/373922/pexels-photo-373922.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "Juego de Sábanas de Lino": "https://images.pexels.com/photos/4222349/pexels-photo-4222349.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "Aspiradora Robótica Smart": "https://images.pexels.com/photos/4392876/pexels-photo-4392876.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "Lámpara de Escritorio LED": "https://images.pexels.com/photos/1112598/pexels-photo-1112598.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+    };
+
     const urlParams = new URLSearchParams(window.location.search);
     let currentCategory = urlParams.get('cat') || 'all';
     let currentFilters = {};
@@ -30,7 +44,7 @@ function initProductPage() {
     // ----------------------------------------------------
 
     function renderProductCard(product) {
-        const imageUrl = product.imagenUrl || `https://placehold.co/300x300/eee/333?text=${product.nombre.substring(0,10)}`;
+        const imageUrl = productImageMap[product.nombre] || product.image || `https://placehold.co/300x300/eee/333?text=${product.nombre.substring(0,10)}`;
         return `
             <a href="detalle.html?id=${product.id}" class="product-card-link">
                 <div class="product-card">
@@ -71,7 +85,6 @@ function initProductPage() {
 
     const saveCart = (cart) => {
         localStorage.setItem('cart', JSON.stringify(cart));
-        // Aquí podríamos actualizar un contador de carrito en la UI si existiera
     }
 
     function addToCart(productId, buttonEl) {
@@ -92,7 +105,6 @@ function initProductPage() {
 
         saveCart(cart);
 
-        // Feedback Visual
         alert(`'${product.nombre}' fue añadido al carrito.`);
         buttonEl.disabled = true;
         buttonEl.textContent = "¡Añadido!";
@@ -198,10 +210,8 @@ function initProductPage() {
 // --- CORRECCIÓN DEFINITIVA (ANTI-RACE-CONDITION) ---
 function main() {
     if (window.db) {
-        // Si Firebase ya está listo, ejecuta la lógica de la página inmediatamente.
         initProductPage();
     } else {
-        // Si no, espera a la señal 'firebase-ready'.
         document.addEventListener('firebase-ready', initProductPage);
     }
 }
